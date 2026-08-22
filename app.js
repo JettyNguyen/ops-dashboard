@@ -84,24 +84,40 @@ let D = {
   sites: [
     {id:'s1',name:'T23 Láng Hạ',type:'Văn phòng cho thuê',status:'active',phase:'Thi công & vận hành thử',country:'Việt Nam',pct:45,budget:5000,actual:2800,over:85,rev:0,sop:0,sopT:5,fill:0,rubix:'no',lead:'PMO',lang:'vi',start:'2025-01-01',end:'2025-10-30',note:'BE6 SOP cần ưu tiên'},
     {id:'s2',name:'T16 Láng Hạ',type:'Văn phòng cho thuê',status:'active',phase:'Cải tạo & thiết kế',country:'Việt Nam',pct:25,budget:3500,actual:800,over:0,rev:0,sop:0,sopT:5,fill:0,rubix:'no',lead:'PMO',lang:'vi',start:'2025-03-01',end:'2026-02-28',note:'Phụ thuộc SOP T23'},
-    {id:'s3',name:'Tư Đình',type:'Văn phòng cho thuê',status:'upcoming',phase:'Tiền khả thi',country:'Việt Nam',pct:0,budget:0,actual:0,over:0,rev:0,sop:0,sopT:5,fill:0,rubix:'no',lead:'PMO',lang:'vi',start:'',end:'',note:'Dependency: SOP Láng Hạ'},
-    {id:'s4',name:'HUD',type:'Văn phòng cho thuê',status:'upcoming',phase:'Ý tưởng',country:'Việt Nam',pct:0,budget:0,actual:0,over:0,rev:0,sop:0,sopT:5,fill:0,rubix:'no',lead:'PMO',lang:'vi',start:'',end:'',note:'Site thứ 4'},
+    {id:'s3',name:'Tư Đình',type:'Văn phòng cho thuê',status:'upcoming',phase:'Tiền khả thi — chuẩn bị nhân bản SOP',country:'Việt Nam',pct:5,budget:4200,actual:0,over:0,rev:0,sop:0,sopT:5,fill:0,rubix:'no',lead:'PMO',lang:'vi',start:'2025-11-01',end:'2026-06-30',note:'Dependency: SOP Láng Hạ hoàn chỉnh · Playbook BE1-8 cần xong trước onboard'},
+    {id:'s4',name:'HUD',type:'Văn phòng cho thuê',status:'upcoming',phase:'Ý tưởng — đang khảo sát',country:'Việt Nam',pct:0,budget:0,actual:0,over:0,rev:0,sop:0,sopT:5,fill:0,rubix:'no',lead:'PMO',lang:'vi',start:'',end:'',note:'Site thứ 4 · Chờ kết quả Tư Đình'},
+    {id:'s5',name:'Khách sạn NT',type:'Khách sạn',status:'upcoming',phase:'M&A / Thẩm định',country:'Việt Nam',pct:0,budget:0,actual:0,over:0,rev:0,sop:0,sopT:8,fill:0,rubix:'no',lead:'PMO',lang:'vi-en',start:'',end:'',note:'Tích hợp dịch vụ vận hành 4★ · Phối hợp Rubix · Cần SOP riêng cho hospitality'},
   ],
   members: [],
   meetings: [],
   changes: [], changeCounter: 1,
   health: {be1:3,be2:3,be3:4,be4:3,be5:3,be6:2,be7:2,be8:2},
   okrs: [
-    {obj:'O1 — Xây nền tảng nhân bản',kr:'KR1: ≥5 SOP T23 trước tuần 8',truc:'BE6',owner:'QL VH Site',target:5,unit:'SOP',actual:0},
-    {obj:'O1 — Xây nền tảng nhân bản',kr:'KR2: 100% hồ sơ pháp lý T23',truc:'BE7',owner:'HC+QL TK',target:100,unit:'%',actual:0},
-    {obj:'O1 — Xây nền tảng nhân bản',kr:'KR3: Retrospective T6 ≥8 tuần',truc:'BE8',owner:'PMO',target:8,unit:'tuần',actual:0},
-    {obj:'O1 — Xây nền tảng nhân bản',kr:'KR4: Rubix xác nhận 4★ ≥1 site',truc:'BE6',owner:'PMO',target:1,unit:'site',actual:0},
-    {obj:'O2 — Dòng tiền & P3',kr:'KR1: Phát sinh ≤5% dự toán',truc:'BE5',owner:'QL TC',target:5,unit:'%',actual:0},
-    {obj:'O2 — Dòng tiền & P3',kr:'KR2: Lấp đầy T23 ≥80%',truc:'FE3',owner:'PMO',target:80,unit:'%',actual:0},
-    {obj:'O2 — Dòng tiền & P3',kr:'KR3: P3 ký với CĐT trước Q2',truc:'FE5',owner:'PMO',target:1,unit:'HĐ',actual:0},
-    {obj:'O3 — Nhân bản Tư Đình',kr:'KR1: Playbook BE1-8 hoàn chỉnh',truc:'BE6',owner:'PMO',target:1,unit:'playbook',actual:0},
-    {obj:'O3 — Nhân bản Tư Đình',kr:'KR2: Onboard Tư Đình ≤4 tuần',truc:'BE2',owner:'PMO',target:4,unit:'tuần',actual:0},
+    // ── O1: Vận hành chuẩn 4★ tại Láng Hạ (Q3 2025) ──
+    {obj:'O1 — Vận hành chuẩn 4★ tại Láng Hạ (Q3/2025)',kr:'KR1.1: Hoàn thiện ≥5 SOP vận hành T23 được Rubix xác nhận',truc:'BE6',owner:'QL VH Site',target:5,unit:'SOP',actual:0},
+    {obj:'O1 — Vận hành chuẩn 4★ tại Láng Hạ (Q3/2025)',kr:'KR1.2: 100% hồ sơ pháp lý T23 & T16 được số hóa BE7',truc:'BE7',owner:'HC + QL TK',target:100,unit:'%',actual:0},
+    {obj:'O1 — Vận hành chuẩn 4★ tại Láng Hạ (Q3/2025)',kr:'KR1.3: Rubix đánh giá 4★ ≥1 site trước cuối Q3',truc:'BE6',owner:'PMO',target:1,unit:'site',actual:0},
+    {obj:'O1 — Vận hành chuẩn 4★ tại Láng Hạ (Q3/2025)',kr:'KR1.4: Retrospective BE8 diễn ra đủ 6 tuần liên tiếp',truc:'BE8',owner:'PMO',target:6,unit:'tuần',actual:0},
+    {obj:'O1 — Vận hành chuẩn 4★ tại Láng Hạ (Q3/2025)',kr:'KR1.5: Health Score 8 trục trung bình ≥3.5/5',truc:'BE1',owner:'PMO',target:35,unit:'(×10)',actual:0},
+    // ── O2: Dòng tiền & P3 (Q3 2025) ──
+    {obj:'O2 — Dòng tiền & P3 (Q3/2025)',kr:'KR2.1: Phát sinh T23+T16 ≤5% dự toán',truc:'BE5',owner:'QL TC',target:5,unit:'%',actual:0},
+    {obj:'O2 — Dòng tiền & P3 (Q3/2025)',kr:'KR2.2: Lấp đầy T23 đạt ≥60% cuối Q3',truc:'FE3',owner:'PMO',target:60,unit:'%',actual:0},
+    {obj:'O2 — Dòng tiền & P3 (Q3/2025)',kr:'KR2.3: Ký HĐ P3 với CĐT trước 30/09',truc:'FE5',owner:'PMO',target:1,unit:'HĐ',actual:0},
+    {obj:'O2 — Dòng tiền & P3 (Q3/2025)',kr:'KR2.4: Doanh thu dịch vụ vận hành ≥50tr/tháng từ T9',truc:'FE1',owner:'PMO',target:50,unit:'tr.đ',actual:0},
+    // ── O3: Nhân bản sang Tư Đình (Q4 2025) ──
+    {obj:'O3 — Nhân bản mô hình sang Tư Đình (Q4/2025)',kr:'KR3.1: Playbook vận hành 4★ BE1-8 hoàn chỉnh trước 30/10',truc:'BE6',owner:'PMO',target:1,unit:'playbook',actual:0},
+    {obj:'O3 — Nhân bản mô hình sang Tư Đình (Q4/2025)',kr:'KR3.2: Onboard đội ngũ Tư Đình ≤4 tuần theo playbook',truc:'BE2',owner:'PMO + HR',target:4,unit:'tuần',actual:0},
+    {obj:'O3 — Nhân bản mô hình sang Tư Đình (Q4/2025)',kr:'KR3.3: ≥3 SOP Tư Đình được triển khai trong tháng đầu',truc:'BE6',owner:'QL VH Tư Đình',target:3,unit:'SOP',actual:0},
+    {obj:'O3 — Nhân bản mô hình sang Tư Đình (Q4/2025)',kr:'KR3.4: Báo cáo onboard Tư Đình gửi CĐT trước 15/12',truc:'BE7',owner:'PMO',target:1,unit:'báo cáo',actual:0},
+    // ── O4: M&A & Dịch vụ mới (Q4 2025) ──
+    {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.1: Hoàn tất thẩm định ≥1 công ty vệ sinh công nghiệp',truc:'BE2',owner:'PMO',target:1,unit:'công ty',actual:0},
+    {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.2: Khách sạn NT — SOP hospitality draft xong Q4',truc:'BE6',owner:'PMO + Rubix',target:1,unit:'SOP draft',actual:0},
+    {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.3: Ra mắt gói dịch vụ trọn gói (hành chính + kế toán + pháp lý)',truc:'FE2',owner:'PMO',target:1,unit:'gói DV',actual:0},
+    {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.4: ≥2 khách hàng thử nghiệm gói dịch vụ trọn gói',truc:'FE3',owner:'PMO + Sales',target:2,unit:'KH',actual:0},
   ],
+  ma: [], maCounter: 1,
+  maFilter: 'all',
+  editingMaId: null,
   activeFilter: 'all',
   editingSiteId: null, editingMemberId: null,
 };
@@ -112,7 +128,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
@@ -174,6 +190,8 @@ async function loadFromSheets() {
         Object.keys(data.health).forEach(k => { D.health[k] = +data.health[k] || 3; });
       }
       if (data.meta && data.meta.changeCounter) D.changeCounter = +data.meta.changeCounter || 1;
+      if (data.ma && data.ma.length) D.ma = data.ma;
+      if (data.meta && data.meta.maCounter) D.maCounter = +data.meta.maCounter || 1;
 
       // Cache offline
       localStorage.setItem(LS_KEY, JSON.stringify(D));
@@ -274,6 +292,7 @@ function sw(id, btn) {
   if(id==='change') populateChangeSel();
   if(id==='report') { populateRptSel(); renderReportPreview(); }
   if(id==='intl') { renderClocks(); renderMembers(); renderMeetings(); renderIntlChecklist(); }
+  if(id==='ma') renderMa();
 }
 
 function openModal(id) { $(id).classList.add('open'); }
@@ -850,6 +869,7 @@ function openWechat(){
 function refreshAll(){
   renderOverview();renderSiteList();renderOKR();renderChanges();
   populateFinSelect();populateChangeSel();populateRptSel();
+  if(document.getElementById('panel-ma')?.classList.contains('active')) renderMa();
 }
 
 document.querySelectorAll('.overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
@@ -872,4 +892,196 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 // Khởi động: load từ Sheets trước
+// ═══════════════════════════════════════════════════════════════
+// M&A TRACKER
+// ═══════════════════════════════════════════════════════════════
+
+const MA_STAGES = [
+  { id:'tim-kiem',  label:'🔍 Tìm kiếm',  color:'#6B6B6B', bg:'#F5F5F2' },
+  { id:'tiep-can',  label:'📞 Tiếp cận',   color:'#3D5CF5', bg:'#EEF2FF' },
+  { id:'tham-dinh', label:'🔬 Thẩm định',  color:'#B86B00', bg:'#FFF3DC' },
+  { id:'dam-phan',  label:'🤝 Đàm phán',   color:'#8B4513', bg:'#FDF0E0' },
+  { id:'hoan-tat',  label:'✅ Hoàn tất',   color:'#0D6E4A', bg:'#E0F8EE' },
+];
+
+const MA_TYPE_LABEL = { 've-sinh':'🧹 Vệ sinh CN', 'su-kien':'🎪 Sự kiện', 'other':'🏢 Khác' };
+const MA_DEAL_LABEL = { '100%':'Mua 100%', '51%+':'Đầu tư 51%+', 'hop-tac':'Hợp tác ĐQ', '':'—' };
+
+function maFiltered() {
+  const q = ($('ma-search')?.value||'').toLowerCase();
+  return D.ma.filter(c => {
+    const matchType = D.maFilter==='all' || c.type===D.maFilter;
+    const matchQ = !q || c.name.toLowerCase().includes(q) || (c.contact||'').toLowerCase().includes(q);
+    return matchType && matchQ;
+  });
+}
+
+function setMaFilter(f, btn) {
+  D.maFilter = f;
+  document.querySelectorAll('#panel-ma .filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMa();
+}
+
+function renderMa() {
+  const items = maFiltered();
+
+  // ── KPI strip ──
+  const total    = D.ma.length;
+  const active   = D.ma.filter(c => c.status !== 'hoan-tat').length;
+  const done     = D.ma.filter(c => c.status === 'hoan-tat').length;
+  const negotiating = D.ma.filter(c => c.status === 'dam-phan').length;
+  const avgScore = D.ma.filter(c=>+c.score>0).length
+    ? Math.round(D.ma.filter(c=>+c.score>0).reduce((a,c)=>a+(+c.score||0),0)/D.ma.filter(c=>+c.score>0).length)
+    : 0;
+
+  $('ma-kpi-row').innerHTML = [
+    { val: total,       label: 'Tổng công ty',      color: '#1A2F5A', bg:'#EEF2FF' },
+    { val: active,      label: 'Đang theo dõi',     color: '#3D5CF5', bg:'#EEF2FF' },
+    { val: negotiating, label: 'Đang đàm phán',     color: '#B86B00', bg:'#FFF3DC' },
+    { val: done,        label: 'Đã hoàn tất deal',  color: '#0D6E4A', bg:'#E0F8EE' },
+  ].map(k => `<div class="card kpi" style="border-top:3px solid ${k.color};background:${k.bg}">
+    <div class="kpi-val" style="color:${k.color}">${k.val}</div>
+    <div class="kpi-label">${k.label}</div>
+  </div>`).join('');
+
+  // ── Kanban ──
+  $('ma-kanban').innerHTML = MA_STAGES.map(stage => {
+    const cards = items.filter(c => c.status === stage.id);
+    const cardsHtml = cards.map(c => {
+      const scoreColor = +c.score>=70?'#0D6E4A':+c.score>=55?'#B86B00':+c.score>0?'#C0392B':'#aaa';
+      const daysLeft = c.deadline ? Math.ceil((new Date(c.deadline)-new Date())/(1000*60*60*24)) : null;
+      const deadlineBadge = daysLeft !== null
+        ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:${daysLeft<7?'#FCEBEB':daysLeft<14?'#FFF3DC':'#F5F5F2'};color:${daysLeft<7?'#C0392B':daysLeft<14?'#B86B00':'#6B6B6B'}">⏰ ${daysLeft<0?'Quá hạn':daysLeft+'d'}</span>` : '';
+      return `<div onclick="openEditMa('${c.id}')" style="background:#fff;border:1px solid #E2E2DC;border-radius:8px;padding:9px 11px;margin-bottom:7px;cursor:pointer;border-left:3px solid ${stage.color}">
+        <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#1A1A1A">${c.name}</div>
+        <div style="font-size:10px;color:#6B6B6B;margin-bottom:5px">${MA_TYPE_LABEL[c.type]||c.type} · ${c.location||'—'}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+          ${c.score?`<span style="font-size:10px;font-weight:700;color:${scoreColor}">${c.score}/100</span>`:''}
+          ${c.deal?`<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:#EEF2FF;color:#3D5CF5">${MA_DEAL_LABEL[c.deal]}</span>`:''}
+          ${deadlineBadge}
+        </div>
+        ${c.note?`<div style="font-size:10px;color:#B86B00;margin-top:4px;border-top:1px solid #F5F5F2;padding-top:4px">→ ${c.note}</div>`:''}
+        <div style="font-size:9px;color:#aaa;margin-top:4px">${c.owner||'PMO'}</div>
+      </div>`;
+    }).join('') || `<div style="font-size:11px;color:#aaa;text-align:center;padding:12px 6px">Trống</div>`;
+
+    return `<div style="background:#FAFAF8;border:1px solid #E2E2DC;border-radius:10px;padding:10px">
+      <div style="font-size:11px;font-weight:700;color:${stage.color};margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+        <span>${stage.label}</span>
+        <span style="background:${stage.bg};color:${stage.color};padding:2px 8px;border-radius:10px;font-size:10px">${cards.length}</span>
+      </div>
+      ${cardsHtml}
+    </div>`;
+  }).join('');
+
+  // ── Table ──
+  if(!items.length) {
+    $('ma-table').innerHTML='';
+    $('ma-empty').style.display='block';
+    return;
+  }
+  $('ma-empty').style.display='none';
+  const stageMap = Object.fromEntries(MA_STAGES.map(s=>[s.id,s]));
+  $('ma-table').innerHTML = items.map(c => {
+    const st = stageMap[c.status]||MA_STAGES[0];
+    const sc = +c.score;
+    const scColor = sc>=70?'#0D6E4A':sc>=55?'#B86B00':sc>0?'#C0392B':'#aaa';
+    return `<tr>
+      <td style="font-weight:600">${c.name}</td>
+      <td>${MA_TYPE_LABEL[c.type]||c.type}</td>
+      <td><span class="pill" style="background:${st.bg};color:${st.color}">${st.label}</span></td>
+      <td style="font-weight:700;color:${scColor}">${sc||'—'}</td>
+      <td style="font-size:11px">${MA_DEAL_LABEL[c.deal||'']}</td>
+      <td style="font-size:11px">${c.valuation?Number(c.valuation).toLocaleString('vi-VN')+' tr':'—'}</td>
+      <td style="font-size:11px">${c.contact||'—'}</td>
+      <td style="font-size:10px;color:#6B6B6B">${c.updatedAt||c.date||'—'}</td>
+      <td style="font-size:11px">${c.owner||'PMO'}</td>
+      <td>
+        <button class="btn btn-sm btn-amber" style="padding:2px 8px" onclick="openEditMa('${c.id}')">✏️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Open modal ──────────────────────────────────────────────
+function openAddMa() {
+  D.editingMaId = null;
+  $('modal-ma-title').textContent = 'Thêm công ty M&A';
+  $('ma-del-btn').style.display = 'none';
+  ['ma-name','ma-location','ma-contact','ma-owner','ma-pros','ma-cons','ma-note'].forEach(id => $(id).value='');
+  ['ma-headcount','ma-revenue','ma-valuation','ma-score'].forEach(id => $(id).value='');
+  $('ma-type').value='ve-sinh'; $('ma-status').value='tim-kiem';
+  $('ma-deal').value=''; $('ma-date').value=''; $('ma-deadline').value='';
+  openModal('modal-ma');
+}
+
+function openEditMa(id) {
+  const c = D.ma.find(x=>x.id===id); if(!c) return;
+  D.editingMaId = id;
+  $('modal-ma-title').textContent = 'Chỉnh sửa: '+c.name;
+  $('ma-del-btn').style.display = 'inline-block';
+  $('ma-name').value     = c.name||'';
+  $('ma-type').value     = c.type||'ve-sinh';
+  $('ma-status').value   = c.status||'tim-kiem';
+  $('ma-deal').value     = c.deal||'';
+  $('ma-location').value = c.location||'';
+  $('ma-headcount').value= c.headcount||'';
+  $('ma-revenue').value  = c.revenue||'';
+  $('ma-valuation').value= c.valuation||'';
+  $('ma-score').value    = c.score||'';
+  $('ma-contact').value  = c.contact||'';
+  $('ma-owner').value    = c.owner||'';
+  $('ma-date').value     = c.date||'';
+  $('ma-deadline').value = c.deadline||'';
+  $('ma-pros').value     = c.pros||'';
+  $('ma-cons').value     = c.cons||'';
+  $('ma-note').value     = c.note||'';
+  openModal('modal-ma');
+}
+
+function saveMa() {
+  const name = $('ma-name').value.trim();
+  if(!name){ toast('Nhập tên công ty', true); return; }
+  const entry = {
+    id: D.editingMaId || ('MA-'+String(D.maCounter++).padStart(3,'0')),
+    name, type:$('ma-type').value, status:$('ma-status').value,
+    deal:$('ma-deal').value, location:$('ma-location').value,
+    headcount:+$('ma-headcount').value||0, revenue:+$('ma-revenue').value||0,
+    valuation:+$('ma-valuation').value||0, score:+$('ma-score').value||0,
+    contact:$('ma-contact').value, owner:$('ma-owner').value,
+    date:$('ma-date').value, deadline:$('ma-deadline').value,
+    pros:$('ma-pros').value, cons:$('ma-cons').value, note:$('ma-note').value,
+    updatedAt: today(),
+  };
+  if(D.editingMaId) {
+    const i = D.ma.findIndex(x=>x.id===D.editingMaId);
+    if(i>=0) D.ma[i]=entry;
+  } else {
+    D.ma.push(entry);
+  }
+  closeModal('modal-ma');
+  renderMa();
+  saveAll();
+  toast((D.editingMaId?'Đã cập nhật':'Đã thêm')+': '+name+' ✓');
+}
+
+function deleteMaFromModal() {
+  if(!D.editingMaId) return;
+  const c = D.ma.find(x=>x.id===D.editingMaId);
+  if(!c || !confirm(`Xóa "${c.name}"?`)) return;
+  D.ma = D.ma.filter(x=>x.id!==D.editingMaId);
+  closeModal('modal-ma');
+  renderMa();
+  saveAll();
+  toast('Đã xóa '+c.name);
+}
+
+// ── Quick stage advance from kanban ─────────────────────────
+function advanceMaStage(id) {
+  const c = D.ma.find(x=>x.id===id); if(!c) return;
+  const idx = MA_STAGES.findIndex(s=>s.id===c.status);
+  if(idx<MA_STAGES.length-1) { c.status=MA_STAGES[idx+1].id; c.updatedAt=today(); renderMa(); saveAll(); }
+}
+
 loadFromSheets().then(() => refreshAll());
