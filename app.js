@@ -212,7 +212,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
