@@ -14,41 +14,16 @@ const I18N = {
     'comm-title':'Giao tiếp & Lịch họp','meeting-name':'Tên buổi họp',
     'meeting-time':'Giờ (VN)','meeting-day':'Ngày','meeting-note':'Link / Ghi chú',
     'addMeeting':'Thêm lịch họp','barrier-title':'Rào cản giao tiếp',
-    'checklist-title':'Checklist làm việc với team TQ','tips-title':'Tips giao tiếp đa văn hóa',
+    'checklist-title':'Checklist làm việc với team TQ',
+    'tips-title':'Tips giao tiếp đa văn hóa',
     'fin-input':'Tài chính theo site','select-site':'Chọn site',
-    'budget':'Dự toán (tr.đ)','actual':'Thực tế (tr.đ)','overage':'Phát sinh (tr.đ)','revenue':'Doanh thu/tháng',
+    'budget':'Dự toán (tr.đ)','actual':'Thực tế (tr.đ)',
+    'overage':'Phát sinh (tr.đ)','revenue':'Doanh thu/tháng',
     'save-fin':'Lưu tài chính','fin-result':'Kết quả',
-    'new-change':'Nhập Change mới','change-content':'Nội dung','accountable':'Người A','log-change':'Ghi nhận',
+    'new-change':'Nhập Change mới','change-content':'Nội dung',
+    'accountable':'Người A','log-change':'Ghi nhận',
     'snapshot-title':'📋 Snapshot Site','alert-title':'Cảnh báo hệ thống',
     'fc-active':'Đang chạy','fc-upcoming':'Sắp tới','fc-done':'Hoàn thành',
-    'total-projects':'Tổng dự án','sop-done':'SOP hoàn chỉnh','change-pending':'Change pending','intl-team':'Team QT',
-    'health-score':'Health Score','no-sites':'Chưa có dự án nào.','add-first':'+ Thêm dự án đầu tiên',
-    'progress':'Tiến độ','phase':'Giai đoạn','lead':'Phụ trách',
-    'status-active':'Đang chạy','status-upcoming':'Sắp tới','status-done':'Hoàn thành','status-paused':'Tạm dừng',
-    'edit':'Sửa','clone':'Nhân bản','delete':'Xóa','save':'💾 Lưu','cancel':'Hủy',
-    'pending':'Pending','approved':'Approved','rejected':'Rejected','done-status':'Done',
-    'no-members':'Chưa có thành viên quốc tế.','no-meetings':'Chưa có lịch họp.',
-    'no-changes':'Chưa có change.','no-kr':'Chưa có KR nào.',
-    'working':'🟢 Đang làm việc','off-hours':'🔴 Ngoài giờ',
-    'topbar-sub':'{n} dự án · {a} đang chạy · {m} thành viên QT',
-    'toast-saved':'Đã lưu ✓','toast-saving':'Đang lưu ☁️...',
-    'toast-added':'Đã thêm','toast-updated':'Đã cập nhật','toast-deleted':'Đã xóa','toast-cloned':'Đã nhân bản ✓',
-    'toast-fin-saved':'Đã lưu tài chính ✓','toast-member-added':'Đã thêm thành viên ✓',
-    'toast-meeting-added':'Đã thêm lịch họp ✓','toast-kr-added':'Đã thêm KR ✓',
-    'err-name':'Vui lòng nhập tên','err-site-content':'Chọn site và nhập nội dung','err-kr':'Vui lòng nhập KR',
-    'confirm-delete':'Xóa "{name}"?','confirm-reset':'Reset tất cả Actual về 0?',
-    't-ma':'🏭 M&A','ma-all':'Tất cả','ma-ve-sinh':'🧹 Vệ sinh CN','ma-su-kien':'🎪 Sự kiện','ma-other':'🏢 Khác',
-    'ma-add':'+ Thêm công ty','ma-total':'Tổng công ty','ma-active':'Đang theo dõi',
-    'ma-negotiating':'Đang đàm phán','ma-done':'Đã hoàn tất deal','ma-empty':'Chưa có công ty nào.',
-    'ma-detail':'📋 Danh sách chi tiết','ma-search':'🔍 Tìm công ty...',
-    'ma-col-company':'Công ty','ma-col-type':'Loại','ma-col-status':'Trạng thái','ma-col-score':'Điểm DD',
-    'ma-col-deal':'Hình thức deal','ma-col-val':'Định giá (tr.đ)','ma-col-contact':'Liên hệ','ma-col-updated':'Cập nhật','ma-col-owner':'Người A',
-    'stage-tim-kiem':'🔍 Tìm kiếm','stage-tiep-can':'📞 Tiếp cận','stage-tham-dinh':'🔬 Thẩm định','stage-dam-phan':'🤝 Đàm phán','stage-hoan-tat':'✅ Hoàn tất',
-    'ma-empty-col':'Trống','ma-overdue':'Quá hạn',
-    'toast-ma-added':'Đã thêm','toast-ma-updated':'Đã cập nhật','toast-ma-deleted':'Đã xóa','err-ma-name':'Nhập tên công ty',
-    'modal-ma-add':'Thêm công ty M&A','modal-ma-edit':'Chỉnh sửa',
-    'deal-unknown':'Chưa xác định','deal-100':'Mua lại 100%','deal-51':'Đầu tư chiến lược 51%+','deal-coop':'Hợp tác vận hành độc quyền',
-    'actual-lbl':'Actual','target-lbl':'Target','remaining':'Còn lại','payback':'Hoàn vốn dự kiến','spent-budget':'Chi / Dự toán','overrun':'Phát sinh %',
   },
   en: {
     'addSite':'Add project','export':'Export','t-overview':'🏠 Overview',
@@ -59,41 +34,16 @@ const I18N = {
     'comm-title':'Communication & Meetings','meeting-name':'Meeting name',
     'meeting-time':'Time (VN)','meeting-day':'Day','meeting-note':'Link / Notes',
     'addMeeting':'Add meeting','barrier-title':'Communication barriers',
-    'checklist-title':'Working with CN team checklist','tips-title':'Cross-culture tips',
+    'checklist-title':'Working with CN team checklist',
+    'tips-title':'Cross-culture communication tips',
     'fin-input':'Site Financials','select-site':'Select site',
-    'budget':'Budget (M VND)','actual':'Actual spend','overage':'Cost overrun','revenue':'Monthly revenue',
-    'save-fin':'Save financials','fin-result':'Results',
-    'new-change':'Log new change','change-content':'Description','accountable':'Accountable (A)','log-change':'Submit',
+    'budget':'Budget (million VND)','actual':'Actual spend',
+    'overage':'Cost overrun','revenue':'Monthly revenue',
+    'save-fin':'Save financials','fin-result':'Calculated results',
+    'new-change':'Log new change','change-content':'Description',
+    'accountable':'Accountable (A)','log-change':'Submit',
     'snapshot-title':'📋 Site Snapshot','alert-title':'System Alerts',
     'fc-active':'Active','fc-upcoming':'Upcoming','fc-done':'Done',
-    'total-projects':'Total projects','sop-done':'SOPs done','change-pending':'Pending changes','intl-team':'Intl members',
-    'health-score':'Health Score','no-sites':'No projects yet.','add-first':'+ Add first project',
-    'progress':'Progress','phase':'Phase','lead':'Lead',
-    'status-active':'Active','status-upcoming':'Upcoming','status-done':'Done','status-paused':'Paused',
-    'edit':'Edit','clone':'Clone','delete':'Delete','save':'💾 Save','cancel':'Cancel',
-    'pending':'Pending','approved':'Approved','rejected':'Rejected','done-status':'Done',
-    'no-members':'No international team members yet.','no-meetings':'No recurring meetings yet.',
-    'no-changes':'No changes logged.','no-kr':'No KRs yet.',
-    'working':'🟢 Working','off-hours':'🔴 Off hours',
-    'topbar-sub':'{n} projects · {a} active · {m} intl members',
-    'toast-saved':'Saved ✓','toast-saving':'Saving ☁️...',
-    'toast-added':'Added','toast-updated':'Updated','toast-deleted':'Deleted','toast-cloned':'Cloned ✓',
-    'toast-fin-saved':'Finance saved ✓','toast-member-added':'Member added ✓',
-    'toast-meeting-added':'Meeting added ✓','toast-kr-added':'KR added ✓',
-    'err-name':'Please enter a name','err-site-content':'Select a site and enter content','err-kr':'Please enter a KR',
-    'confirm-delete':'Delete "{name}"?','confirm-reset':'Reset all actuals to 0?',
-    't-ma':'🏭 M&A','ma-all':'All','ma-ve-sinh':'🧹 Cleaning','ma-su-kien':'🎪 Events','ma-other':'🏢 Other',
-    'ma-add':'+ Add company','ma-total':'Total companies','ma-active':'In pipeline',
-    'ma-negotiating':'Negotiating','ma-done':'Deals closed','ma-empty':'No companies yet.',
-    'ma-detail':'📋 Detailed list','ma-search':'🔍 Search companies...',
-    'ma-col-company':'Company','ma-col-type':'Type','ma-col-status':'Stage','ma-col-score':'DD Score',
-    'ma-col-deal':'Deal type','ma-col-val':'Valuation (M VND)','ma-col-contact':'Contact','ma-col-updated':'Updated','ma-col-owner':'Owner',
-    'stage-tim-kiem':'🔍 Sourcing','stage-tiep-can':'📞 Outreach','stage-tham-dinh':'🔬 Due diligence','stage-dam-phan':'🤝 Negotiation','stage-hoan-tat':'✅ Closed',
-    'ma-empty-col':'Empty','ma-overdue':'Overdue',
-    'toast-ma-added':'Added','toast-ma-updated':'Updated','toast-ma-deleted':'Deleted','err-ma-name':'Enter company name',
-    'modal-ma-add':'Add M&A company','modal-ma-edit':'Edit',
-    'deal-unknown':'Not determined','deal-100':'Full acquisition','deal-51':'Strategic 51%+','deal-coop':'Exclusive partnership',
-    'actual-lbl':'Actual','target-lbl':'Target','remaining':'Remaining','payback':'Est. payback','spent-budget':'Spent / Budget','overrun':'Overrun %',
   },
   zh: {
     'addSite':'添加项目','export':'导出','t-overview':'🏠 概览',
@@ -104,49 +54,18 @@ const I18N = {
     'comm-title':'沟通与会议','meeting-name':'会议名称',
     'meeting-time':'时间（越南）','meeting-day':'日期','meeting-note':'链接/备注',
     'addMeeting':'添加会议','barrier-title':'沟通障碍',
-    'checklist-title':'与越南团队合作清单','tips-title':'跨文化沟通技巧',
+    'checklist-title':'与越南团队合作清单',
+    'tips-title':'跨文化沟通技巧',
     'fin-input':'站点财务','select-site':'选择站点',
-    'budget':'预算（百万越盾）','actual':'实际支出','overage':'超支','revenue':'月收入',
+    'budget':'预算（百万越盾）','actual':'实际支出',
+    'overage':'超支','revenue':'月收入',
     'save-fin':'保存财务','fin-result':'计算结果',
-    'new-change':'记录变更','change-content':'内容','accountable':'负责人(A)','log-change':'提交',
+    'new-change':'记录变更','change-content':'内容',
+    'accountable':'负责人(A)','log-change':'提交',
     'snapshot-title':'📋 站点快照','alert-title':'系统警报',
     'fc-active':'进行中','fc-upcoming':'即将开始','fc-done':'已完成',
-    'total-projects':'项目总数','sop-done':'已完成SOP','change-pending':'待审变更','intl-team':'国际成员',
-    'health-score':'健康评分','no-sites':'暂无项目。','add-first':'+ 添加第一个项目',
-    'progress':'进度','phase':'阶段','lead':'负责人',
-    'status-active':'进行中','status-upcoming':'即将开始','status-done':'已完成','status-paused':'已暂停',
-    'edit':'编辑','clone':'复制','delete':'删除','save':'💾 保存','cancel':'取消',
-    'pending':'待审','approved':'已批准','rejected':'已拒绝','done-status':'已完成',
-    'no-members':'暂无国际团队成员。','no-meetings':'暂无定期会议。',
-    'no-changes':'暂无变更记录。','no-kr':'暂无关键结果。',
-    'working':'🟢 工作中','off-hours':'🔴 下班时间',
-    'topbar-sub':'{n} 个项目 · {a} 进行中 · {m} 名国际成员',
-    'toast-saved':'已保存 ✓','toast-saving':'保存中 ☁️...',
-    'toast-added':'已添加','toast-updated':'已更新','toast-deleted':'已删除','toast-cloned':'已复制 ✓',
-    'toast-fin-saved':'财务已保存 ✓','toast-member-added':'成员已添加 ✓',
-    'toast-meeting-added':'会议已添加 ✓','toast-kr-added':'关键结果已添加 ✓',
-    'err-name':'请输入名称','err-site-content':'请选择站点并输入内容','err-kr':'请输入关键结果',
-    'confirm-delete':'删除"{name}"？','confirm-reset':'将所有实际值重置为0？',
-    't-ma':'🏭 并购','ma-all':'全部','ma-ve-sinh':'🧹 清洁公司','ma-su-kien':'🎪 活动公司','ma-other':'🏢 其他',
-    'ma-add':'+ 添加公司','ma-total':'公司总数','ma-active':'跟踪中',
-    'ma-negotiating':'谈判中','ma-done':'已完成交易','ma-empty':'暂无公司。',
-    'ma-detail':'📋 详细列表','ma-search':'🔍 搜索公司...',
-    'ma-col-company':'公司名称','ma-col-type':'类型','ma-col-status':'阶段','ma-col-score':'尽调评分',
-    'ma-col-deal':'交易类型','ma-col-val':'估值（百万越盾）','ma-col-contact':'联系人','ma-col-updated':'更新时间','ma-col-owner':'负责人',
-    'stage-tim-kiem':'🔍 寻源','stage-tiep-can':'📞 接触','stage-tham-dinh':'🔬 尽职调查','stage-dam-phan':'🤝 谈判','stage-hoan-tat':'✅ 已完成',
-    'ma-empty-col':'暂无','ma-overdue':'已逾期',
-    'toast-ma-added':'已添加','toast-ma-updated':'已更新','toast-ma-deleted':'已删除','err-ma-name':'请输入公司名称',
-    'modal-ma-add':'添加并购公司','modal-ma-edit':'编辑',
-    'deal-unknown':'未确定','deal-100':'100%收购','deal-51':'战略投资51%+','deal-coop':'独家运营合作',
-    'actual-lbl':'实际','target-lbl':'目标','remaining':'剩余','payback':'预计回本','spent-budget':'已用/预算','overrun':'超支比例',
-  },
+  }
 };
-
-// t(key, {placeholder: value}) — get translated string
-function t(key, vars={}) {
-  const str = (I18N[lang]||I18N.vi)[key] || I18N.vi[key] || key;
-  return str.replace(/\{(\w+)\}/g, (_,k) => vars[k]??'');
-}
 
 let lang = 'vi';
 function setLang(l, btn) {
@@ -158,9 +77,6 @@ function setLang(l, btn) {
     if (I18N[l][key]) el.textContent = I18N[l][key];
   });
   refreshAll();
-  // re-render M&A tab label
-  const maTab = document.querySelector('[onclick="sw(\'ma\',this)"]');
-  if(maTab) maTab.textContent = t('t-ma');
 }
 
 // ── DATA STORE ───────────────────────────────────────────────
@@ -212,7 +128,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
@@ -353,7 +269,7 @@ const statusDot = {active:'🟢',travel:'🟡',offline:'🔴'};
 
 function saveAll() {
   scheduleSave();
-  toast(t('toast-saving'));
+  toast('Đang lưu ☁️...');
 }
 
 function toast(msg, err=false) {
@@ -406,19 +322,19 @@ function copyText(srcId, okId) {
 // ── OVERVIEW ─────────────────────────────────────────────────
 function renderOverview() {
   const active = D.sites.filter(s => s.status==='active').length;
-  $('topbar-sub').textContent = t('topbar-sub',{n:D.sites.length,a:active,m:D.members.length});
+  $('topbar-sub').textContent = `${D.sites.length} projects · ${active} active · ${D.members.length} intl members`;
   const totalSop = D.sites.reduce((a,s) => a+(+s.sop||0), 0);
   const pending = D.changes.filter(c => c.status==='Pending').length;
   const intlCount = D.members.filter(m => m.nat !== 'vn').length;
   const avgPct = active > 0 ? Math.round(D.sites.filter(s=>s.status==='active').reduce((a,s)=>a+(+s.pct||0),0)/active) : 0;
   $('kpi-row').innerHTML = [
-    {val:D.sites.length, lbl:t('total-projects'), sub:`${active} active`, col:'#3D5CF5'},
-    {val:totalSop, lbl:t('sop-done'), sub:'Target', col:totalSop>=5?'#0D6E4A':'#B86B00'},
-    {val:pending, lbl:t('change-pending'), sub:t('pending'), col:pending>0?'#B86B00':'#0D6E4A'},
-    {val:D.members.length, lbl:t('intl-team'), sub:`${intlCount} non-VN`, col:'#1A2F5A'},
+    {val:D.sites.length, lbl:{vi:'Tổng dự án',en:'Total projects',zh:'项目总数'}, sub:`${active} active`, col:'#3D5CF5'},
+    {val:totalSop, lbl:{vi:'SOP hoàn chỉnh',en:'SOPs done',zh:'已完成SOP'}, sub:'Active sites target', col:totalSop>=5?'#0D6E4A':'#B86B00'},
+    {val:pending, lbl:{vi:'Change pending',en:'Pending changes',zh:'待审变更'}, sub:'Cần duyệt', col:pending>0?'#B86B00':'#0D6E4A'},
+    {val:D.members.length, lbl:{vi:'Team QT',en:'Intl members',zh:'国际成员'}, sub:`${intlCount} non-VN`, col:'#1A2F5A'},
   ].map(k => `<div class="card kpi" style="border-top:3px solid ${k.col}">
     <div class="kpi-val" style="color:${k.col}">${k.val}</div>
-    <div class="kpi-label">${k.lbl}</div>
+    <div class="kpi-label">${k.lbl[lang]||k.lbl.vi}</div>
     <div style="font-size:10px;color:#6B6B6B;margin-top:2px">${k.sub}</div>
   </div>`).join('');
   renderHealth(); renderAlerts(); renderSnapshot();
@@ -501,7 +417,7 @@ function renderSiteList() {
     const mq = !q||s.name.toLowerCase().includes(q)||(s.phase||'').toLowerCase().includes(q)||(s.country||'').toLowerCase().includes(q);
     return mq && (D.activeFilter==='all'||s.status===D.activeFilter);
   });
-  if(!filtered.length) { $('site-list').innerHTML=`<div class="empty">${t('no-sites')} <button class="btn btn-primary btn-sm" onclick="openAddSite()">${t('add-first')}</button></div>`; return; }
+  if(!filtered.length) { $('site-list').innerHTML=`<div class="empty">No sites found. <button class="btn btn-primary btn-sm" onclick="openAddSite()">+ Add</button></div>`; return; }
   $('site-list').innerHTML = filtered.map(s => {
     const p=+s.pct||0; const col=pCol(p); const sc=statusCol[s.status]||'#6B6B6B';
     const sl=statusLbl[s.status]?statusLbl[s.status][lang]||statusLbl[s.status].vi:'';
@@ -561,7 +477,7 @@ function openEditSite(id) {
   openModal('modal-site');
 }
 function saveSite() {
-  const name=$('ms-name').value.trim(); if(!name){toast(t('err-name'),true);return;}
+  const name=$('ms-name').value.trim(); if(!name){toast('Name required',true);return;}
   const d={id:D.editingSiteId||uid(),name,type:$('ms-type').value,status:$('ms-status').value,
     phase:$('ms-phase').value,country:$('ms-country').value,pct:+$('ms-pct').value||0,
     budget:+$('ms-budget').value||0,actual:+$('ms-actual').value||0,over:+$('ms-over').value||0,
@@ -571,17 +487,17 @@ function saveSite() {
   if(D.editingSiteId){const i=D.sites.findIndex(s=>s.id===D.editingSiteId);if(i>=0)D.sites[i]=d;}
   else D.sites.push(d);
   closeModal('modal-site'); refreshAll(); saveAll();
-  toast((D.editingSiteId?t('toast-updated'):t('toast-added'))+': '+name+' ✓');
+  toast((D.editingSiteId?'Updated':'Added')+': '+name+' ✓');
 }
 function deleteSite(id){
   const s=D.sites.find(x=>x.id===id);
-  if(!s||!confirm(t('confirm-delete',{name:s.name})))return;
-  D.sites=D.sites.filter(x=>x.id!==id); refreshAll(); saveAll(); toast(t('toast-deleted')+': '+s.name);
+  if(!s||!confirm(`Delete "${s.name}"?`))return;
+  D.sites=D.sites.filter(x=>x.id!==id); refreshAll(); saveAll(); toast('Deleted '+s.name);
 }
 function duplicateSite(id){
   const s=D.sites.find(x=>x.id===id); if(!s)return;
   D.sites.push({...s,id:uid(),name:s.name+' (copy)',pct:0,actual:0,over:0,sop:0,fill:0,rubix:'no'});
-  refreshAll(); saveAll(); toast(t('toast-cloned'));
+  refreshAll(); saveAll(); toast('Cloned ✓');
 }
 
 // ── INTL TEAM ────────────────────────────────────────────────
@@ -607,7 +523,7 @@ function renderClocks() {
       <div style="font-size:12px;font-weight:600;margin-bottom:4px">${t.label}</div>
       <div style="font-size:24px;font-weight:700;color:${isWork?'#0D6E4A':'#6B6B6B'};font-family:monospace">${time}</div>
       <div style="font-size:10px;color:#6B6B6B;margin-top:2px">${date}</div>
-      <div style="margin-top:4px;font-size:10px;color:${isWork?'#0D6E4A':'#C0392B'}">${isWork?t('working'):t('off-hours')}</div>
+      <div style="margin-top:4px;font-size:10px;color:${isWork?'#0D6E4A':'#C0392B'}">${isWork?'🟢 Working':'🔴 Off hours'}</div>
     </div>`;
   }).join('');
   setTimeout(renderClocks, 30000);
@@ -615,7 +531,7 @@ function renderClocks() {
 
 function renderMembers() {
   if(!D.members.length) {
-    $('member-list').innerHTML=`<div class="empty">${t('no-members')} <button class="btn btn-primary btn-sm" onclick="openAddMember()">${t('addMember')}</button></div>`;
+    $('member-list').innerHTML=`<div class="empty">No international team members yet. <button class="btn btn-primary btn-sm" onclick="openAddMember()">+ Add</button></div>`;
     return;
   }
   $('member-list').innerHTML = D.members.map((m,i) => {
@@ -646,17 +562,17 @@ function openAddMember() {
   openModal('modal-member');
 }
 function saveMember() {
-  const name=$('mb-name').value.trim(); if(!name){toast(t('err-name'),true);return;}
+  const name=$('mb-name').value.trim(); if(!name){toast('Name required',true);return;}
   D.members.push({
     id:uid(), name, role:$('mb-role').value, nat:$('mb-nat').value,
     tz:$('mb-tz').value, site:$('mb-site').value, lang:$('mb-lang').value,
     contact:$('mb-contact').value, status:$('mb-status').value, note:$('mb-note').value,
   });
-  closeModal('modal-member'); renderMembers(); renderClocks(); saveAll(); toast(t('toast-member-added'));
+  closeModal('modal-member'); renderMembers(); renderClocks(); saveAll(); toast('Member added ✓');
 }
 
 function renderMeetings() {
-  if(!D.meetings.length){$('meeting-list').innerHTML=`<div style="font-size:11px;color:#aaa">${t('no-meetings')}</div>`;return;}
+  if(!D.meetings.length){$('meeting-list').innerHTML='<div style="font-size:11px;color:#aaa">No recurring meetings yet.</div>';return;}
   $('meeting-list').innerHTML = D.meetings.map((m,i) => `
     <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#F5F5F2;border-radius:7px;margin-bottom:5px">
       <div style="flex:1;font-size:12px"><strong>${m.name}</strong> · ${m.day} ${m.time} (VN)
@@ -666,9 +582,9 @@ function renderMeetings() {
     </div>`).join('');
 }
 function addMeeting() {
-  const name=$('mtg-name').value.trim(); if(!name){toast(t('err-name'),true);return;}
+  const name=$('mtg-name').value.trim(); if(!name){toast('Meeting name required',true);return;}
   D.meetings.push({name,time:$('mtg-time').value,day:$('mtg-day').value,note:$('mtg-note').value});
-  $('mtg-name').value=''; $('mtg-note').value=''; renderMeetings(); saveAll(); toast(t('toast-meeting-added'));
+  $('mtg-name').value=''; $('mtg-note').value=''; renderMeetings(); saveAll(); toast('Meeting added ✓');
 }
 
 function renderIntlChecklist() {
@@ -739,19 +655,19 @@ function calcFinance() {
   const up=pct(a,b),op=b>0?((o/b)*100).toFixed(1):0,rem=b-a,pb=r>0?Math.ceil(b/r):'—';
   const uc=up>=90?'#C0392B':up>=70?'#B86B00':'#0D6E4A',oc=+op>5?'#C0392B':'#B86B00';
   $('fin-result').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-    <div style="text-align:center;padding:10px;background:#F5F5F2;border-radius:8px"><div style="font-size:20px;font-weight:700;color:${uc}">${up}%</div><div style="font-size:10px;color:#6B6B6B">${t('spent-budget')}</div><div class="prog" style="margin-top:4px"><div class="pf" style="width:${up}%;background:${uc}"></div></div></div>
-    <div style="text-align:center;padding:10px;background:${+op>5?'#FCEBEB':'#FFF3DC'};border-radius:8px"><div style="font-size:20px;font-weight:700;color:${oc}">${op}%</div><div style="font-size:10px;color:#6B6B6B">${t('overrun')}</div>${+op>5?'<div style="font-size:10px;color:#C0392B">⚠️ Exceeds 5%</div>':''}</div>
+    <div style="text-align:center;padding:10px;background:#F5F5F2;border-radius:8px"><div style="font-size:20px;font-weight:700;color:${uc}">${up}%</div><div style="font-size:10px;color:#6B6B6B">Spent / Budget</div><div class="prog" style="margin-top:4px"><div class="pf" style="width:${up}%;background:${uc}"></div></div></div>
+    <div style="text-align:center;padding:10px;background:${+op>5?'#FCEBEB':'#FFF3DC'};border-radius:8px"><div style="font-size:20px;font-weight:700;color:${oc}">${op}%</div><div style="font-size:10px;color:#6B6B6B">Overrun %</div>${+op>5?'<div style="font-size:10px;color:#C0392B">⚠️ Exceeds 5%</div>':''}</div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div style="padding:8px;background:#EEF2FF;border-radius:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#3D5CF5">${fmt(rem)} tr</div><div style="font-size:10px;color:#6B6B6B">${t('remaining')}</div></div>
-    <div style="padding:8px;background:#E0F8EE;border-radius:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#0D6E4A">${pb}${pb!=='—'?' mo':''}</div><div style="font-size:10px;color:#6B6B6B">${t('payback')}</div></div>
+    <div style="padding:8px;background:#EEF2FF;border-radius:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#3D5CF5">${fmt(rem)} tr</div><div style="font-size:10px;color:#6B6B6B">Remaining</div></div>
+    <div style="padding:8px;background:#E0F8EE;border-radius:7px;text-align:center"><div style="font-size:14px;font-weight:700;color:#0D6E4A">${pb}${pb!=='—'?' mo':''}</div><div style="font-size:10px;color:#6B6B6B">Est. payback</div></div>
   </div>`;
 }
 function saveFinance() {
   const id=$('fin-sel').value; const i=D.sites.findIndex(s=>s.id===id); if(i<0)return;
   D.sites[i].budget=+$('f-budget').value||0; D.sites[i].actual=+$('f-actual').value||0;
   D.sites[i].over=+$('f-over').value||0; D.sites[i].rev=+$('f-rev').value||0;
-  refreshAll(); saveAll(); toast(t('toast-fin-saved'));
+  refreshAll(); saveAll(); toast('Finance saved ✓');
 }
 function calcP3() {
   const pool=+$('p3-pool').value||0,cdtP=+$('p3-cdt').value/100,teamP=+$('p3-team').value/100;
@@ -781,29 +697,29 @@ function renderOKR() {
           <div style="margin-top:3px;font-size:10px;color:#6B6B6B">${o.owner} · <span style="background:#EEF2FF;color:#3D5CF5;padding:1px 6px;border-radius:3px;font-weight:600">${o.truc}</span></div>
         </div>
         <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
-          <div style="text-align:center"><div style="font-size:9px;color:#6B6B6B">${t('actual-lbl')}</div><input type="number" value="${o.actual}" min="0" style="width:58px;text-align:center;font-weight:700;font-size:12px;border:1px solid #E2E2DC;border-radius:5px;padding:3px" oninput="D.okrs[${i}].actual=+this.value;renderOKR()"></div>
-          <div style="text-align:center"><div style="font-size:9px;color:#6B6B6B">${t('target-lbl')}</div><input type="number" value="${o.target}" min="0" style="width:58px;text-align:center;font-size:12px;border:1px solid #E2E2DC;border-radius:5px;padding:3px" oninput="D.okrs[${i}].target=+this.value;renderOKR()"></div>
+          <div style="text-align:center"><div style="font-size:9px;color:#6B6B6B">Actual</div><input type="number" value="${o.actual}" min="0" style="width:58px;text-align:center;font-weight:700;font-size:12px;border:1px solid #E2E2DC;border-radius:5px;padding:3px" oninput="D.okrs[${i}].actual=+this.value;renderOKR()"></div>
+          <div style="text-align:center"><div style="font-size:9px;color:#6B6B6B">Target</div><input type="number" value="${o.target}" min="0" style="width:58px;text-align:center;font-size:12px;border:1px solid #E2E2DC;border-radius:5px;padding:3px" oninput="D.okrs[${i}].target=+this.value;renderOKR()"></div>
           <div style="font-size:10px;color:#6B6B6B">${o.unit}</div>
           <button class="btn btn-red btn-sm" onclick="D.okrs.splice(${i},1);renderOKR()">✕</button>
         </div>
       </div>
     </div>`;
   });
-  $('okr-list').innerHTML=html||`<div class="empty">${t('no-kr')}</div>`;
+  $('okr-list').innerHTML=html||'<div class="empty">No KRs yet.</div>';
 }
 function openAddOKR(){openModal('modal-okr');setTimeout(()=>$('okr-obj').focus(),100);}
 function saveOKR(){
-  const kr=$('okr-kr').value.trim();if(!kr){toast(t('err-kr'),true);return;}
+  const kr=$('okr-kr').value.trim();if(!kr){toast('KR required',true);return;}
   D.okrs.push({obj:$('okr-obj').value.trim()||'O — New',kr,truc:$('okr-truc').value,owner:$('okr-owner').value||'PMO',target:+$('okr-target').value||1,unit:$('okr-unit').value||'',actual:0});
-  closeModal('modal-okr');renderOKR();toast(t('toast-kr-added'));
+  closeModal('modal-okr');renderOKR();toast('KR added ✓');
 }
-function resetOKR(){if(!confirm(t('confirm-reset')))return;D.okrs.forEach(o=>o.actual=0);renderOKR();}
+function resetOKR(){if(!confirm('Reset all actuals to 0?'))return;D.okrs.forEach(o=>o.actual=0);renderOKR();}
 
 // ── CHANGE LOG ────────────────────────────────────────────────
 function populateChangeSel(){$('ch-site').innerHTML='<option value="">Select site...</option>'+D.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');}
 function addChange(){
   const siteId=$('ch-site').value,content=$('ch-content').value.trim();
-  if(!siteId||!content){toast(t('err-site-content'),true);return;}
+  if(!siteId||!content){toast('Select site & enter content',true);return;}
   const site=D.sites.find(s=>s.id===siteId);
   D.changes.unshift({id:'CHG-'+String(D.changeCounter++).padStart(3,'0'),siteId,site:site?.name||'',content,truc:$('ch-truc').value,level:$('ch-level').value,cost:+$('ch-cost').value||0,time:+$('ch-time').value||0,owner:$('ch-owner').value||'PMO',status:'Pending',date:today()});
   renderChanges();renderOverview();
@@ -813,7 +729,7 @@ function addChange(){
 function renderChanges(){
   const pend=D.changes.filter(c=>c.status==='Pending').length;
   $('change-stats').textContent=`${D.changes.length} total · ${pend} pending`;
-  if(!D.changes.length){$('change-table').innerHTML='';$('change-empty').style.display='block';$('change-empty').textContent=t('no-changes');return;}
+  if(!D.changes.length){$('change-table').innerHTML='';$('change-empty').style.display='block';return;}
   $('change-empty').style.display='none';
   const SC={Pending:'p-warn',Approved:'p-ok',Rejected:'p-err',Done:'p-ok'};
   $('change-table').innerHTML=D.changes.map((c,i)=>`<tr>
@@ -980,15 +896,13 @@ setInterval(() => {
 // M&A TRACKER
 // ═══════════════════════════════════════════════════════════════
 
-function getMAStages() {
-  return [
-    { id:'tim-kiem',  label:t('stage-tim-kiem'), color:'#6B6B6B', bg:'#F5F5F2' },
-    { id:'tiep-can',  label:t('stage-tiep-can'), color:'#3D5CF5', bg:'#EEF2FF' },
-    { id:'tham-dinh', label:t('stage-tham-dinh'),color:'#B86B00', bg:'#FFF3DC' },
-    { id:'dam-phan',  label:t('stage-dam-phan'), color:'#8B4513', bg:'#FDF0E0' },
-    { id:'hoan-tat',  label:t('stage-hoan-tat'), color:'#0D6E4A', bg:'#E0F8EE' },
-  ];
-}
+const MA_STAGES = [
+  { id:'tim-kiem',  label:'🔍 Tìm kiếm',  color:'#6B6B6B', bg:'#F5F5F2' },
+  { id:'tiep-can',  label:'📞 Tiếp cận',   color:'#3D5CF5', bg:'#EEF2FF' },
+  { id:'tham-dinh', label:'🔬 Thẩm định',  color:'#B86B00', bg:'#FFF3DC' },
+  { id:'dam-phan',  label:'🤝 Đàm phán',   color:'#8B4513', bg:'#FDF0E0' },
+  { id:'hoan-tat',  label:'✅ Hoàn tất',   color:'#0D6E4A', bg:'#E0F8EE' },
+];
 
 const MA_TYPE_LABEL = { 've-sinh':'🧹 Vệ sinh CN', 'su-kien':'🎪 Sự kiện', 'other':'🏢 Khác' };
 const MA_DEAL_LABEL = { '100%':'Mua 100%', '51%+':'Đầu tư 51%+', 'hop-tac':'Hợp tác ĐQ', '':'—' };
@@ -1022,23 +936,23 @@ function renderMa() {
     : 0;
 
   $('ma-kpi-row').innerHTML = [
-    { val: total,       label: t('ma-total'),       color: '#1A2F5A', bg:'#EEF2FF' },
-    { val: active,      label: t('ma-active'),       color: '#3D5CF5', bg:'#EEF2FF' },
-    { val: negotiating, label: t('ma-negotiating'),  color: '#B86B00', bg:'#FFF3DC' },
-    { val: done,        label: t('ma-done'),         color: '#0D6E4A', bg:'#E0F8EE' },
+    { val: total,       label: 'Tổng công ty',      color: '#1A2F5A', bg:'#EEF2FF' },
+    { val: active,      label: 'Đang theo dõi',     color: '#3D5CF5', bg:'#EEF2FF' },
+    { val: negotiating, label: 'Đang đàm phán',     color: '#B86B00', bg:'#FFF3DC' },
+    { val: done,        label: 'Đã hoàn tất deal',  color: '#0D6E4A', bg:'#E0F8EE' },
   ].map(k => `<div class="card kpi" style="border-top:3px solid ${k.color};background:${k.bg}">
     <div class="kpi-val" style="color:${k.color}">${k.val}</div>
     <div class="kpi-label">${k.label}</div>
   </div>`).join('');
 
   // ── Kanban ──
-  $('ma-kanban').innerHTML = getMAStages().map(stage => {
+  $('ma-kanban').innerHTML = MA_STAGES.map(stage => {
     const cards = items.filter(c => c.status === stage.id);
     const cardsHtml = cards.map(c => {
       const scoreColor = +c.score>=70?'#0D6E4A':+c.score>=55?'#B86B00':+c.score>0?'#C0392B':'#aaa';
       const daysLeft = c.deadline ? Math.ceil((new Date(c.deadline)-new Date())/(1000*60*60*24)) : null;
       const deadlineBadge = daysLeft !== null
-        ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:${daysLeft<7?'#FCEBEB':daysLeft<14?'#FFF3DC':'#F5F5F2'};color:${daysLeft<7?'#C0392B':daysLeft<14?'#B86B00':'#6B6B6B'}">⏰ ${daysLeft<0?t('ma-overdue'):daysLeft+'d'}</span>` : '';
+        ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:${daysLeft<7?'#FCEBEB':daysLeft<14?'#FFF3DC':'#F5F5F2'};color:${daysLeft<7?'#C0392B':daysLeft<14?'#B86B00':'#6B6B6B'}">⏰ ${daysLeft<0?'Quá hạn':daysLeft+'d'}</span>` : '';
       return `<div onclick="openEditMa('${c.id}')" style="background:#fff;border:1px solid #E2E2DC;border-radius:8px;padding:9px 11px;margin-bottom:7px;cursor:pointer;border-left:3px solid ${stage.color}">
         <div style="font-size:12px;font-weight:600;margin-bottom:4px;color:#1A1A1A">${c.name}</div>
         <div style="font-size:10px;color:#6B6B6B;margin-bottom:5px">${MA_TYPE_LABEL[c.type]||c.type} · ${c.location||'—'}</div>
@@ -1065,11 +979,10 @@ function renderMa() {
   if(!items.length) {
     $('ma-table').innerHTML='';
     $('ma-empty').style.display='block';
-    $('ma-empty').textContent=t('ma-empty');
     return;
   }
   $('ma-empty').style.display='none';
-  const stageMap = Object.fromEntries(getMAStages().map(s=>[s.id,s]));
+  const stageMap = Object.fromEntries(MA_STAGES.map(s=>[s.id,s]));
   $('ma-table').innerHTML = items.map(c => {
     const st = stageMap[c.status]||MA_STAGES[0];
     const sc = +c.score;
@@ -1094,7 +1007,7 @@ function renderMa() {
 // ── Open modal ──────────────────────────────────────────────
 function openAddMa() {
   D.editingMaId = null;
-  $('modal-ma-title').textContent = t('modal-ma-add');
+  $('modal-ma-title').textContent = 'Thêm công ty M&A';
   $('ma-del-btn').style.display = 'none';
   ['ma-name','ma-location','ma-contact','ma-owner','ma-pros','ma-cons','ma-note'].forEach(id => $(id).value='');
   ['ma-headcount','ma-revenue','ma-valuation','ma-score'].forEach(id => $(id).value='');
@@ -1106,7 +1019,7 @@ function openAddMa() {
 function openEditMa(id) {
   const c = D.ma.find(x=>x.id===id); if(!c) return;
   D.editingMaId = id;
-  $('modal-ma-title').textContent = t('modal-ma-edit')+': '+c.name;
+  $('modal-ma-title').textContent = 'Chỉnh sửa: '+c.name;
   $('ma-del-btn').style.display = 'inline-block';
   $('ma-name').value     = c.name||'';
   $('ma-type').value     = c.type||'ve-sinh';
@@ -1129,7 +1042,7 @@ function openEditMa(id) {
 
 function saveMa() {
   const name = $('ma-name').value.trim();
-  if(!name){ toast(t('err-ma-name'), true); return; }
+  if(!name){ toast('Nhập tên công ty', true); return; }
   const entry = {
     id: D.editingMaId || ('MA-'+String(D.maCounter++).padStart(3,'0')),
     name, type:$('ma-type').value, status:$('ma-status').value,
@@ -1150,7 +1063,7 @@ function saveMa() {
   closeModal('modal-ma');
   renderMa();
   saveAll();
-  toast((D.editingMaId?t('toast-ma-updated'):t('toast-ma-added'))+': '+name+' ✓');
+  toast((D.editingMaId?'Đã cập nhật':'Đã thêm')+': '+name+' ✓');
 }
 
 function deleteMaFromModal() {
@@ -1161,15 +1074,14 @@ function deleteMaFromModal() {
   closeModal('modal-ma');
   renderMa();
   saveAll();
-  toast(t('toast-ma-deleted')+': '+c.name);
+  toast('Đã xóa '+c.name);
 }
 
 // ── Quick stage advance from kanban ─────────────────────────
 function advanceMaStage(id) {
   const c = D.ma.find(x=>x.id===id); if(!c) return;
-  const _stages = getMAStages();
-  const idx = _stages.findIndex(s=>s.id===c.status);
-  if(idx<_stages.length-1) { c.status=_stages[idx+1].id; c.updatedAt=today(); renderMa(); saveAll(); }
+  const idx = MA_STAGES.findIndex(s=>s.id===c.status);
+  if(idx<MA_STAGES.length-1) { c.status=MA_STAGES[idx+1].id; c.updatedAt=today(); renderMa(); saveAll(); }
 }
 
 loadFromSheets().then(() => refreshAll());
