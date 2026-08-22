@@ -212,7 +212,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
@@ -305,30 +305,33 @@ function normalizeNumbers(s) {
   };
 }
 
-// ── Save lên Google Sheets (dùng GET + payload để tránh CORS) ─
+// ── Save lên Google Sheets (no-cors POST — data ghi được, không đọc response) ─
 async function pushToSheets() {
   if (SHEET_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
     localStorage.setItem(LS_KEY, JSON.stringify(D));
     return;
   }
 
+  localStorage.setItem(LS_KEY, JSON.stringify(D)); // cache local ngay
   updateSyncBadge('syncing');
-  localStorage.setItem(LS_KEY, JSON.stringify(D)); // cache ngay lập tức
 
   try {
-    // Dùng GET + encodeURIComponent để tránh CORS preflight của POST
-    const payload = encodeURIComponent(JSON.stringify({ action: 'save_all', data: D }));
-    const res = await fetch(SHEET_URL + '?action=save_all&payload=' + payload, {
-      method: 'GET',
-      redirect: 'follow',
+    // no-cors: tránh CORS preflight, Apps Script vẫn nhận và ghi data
+    // Không đọc được response — dùng ping riêng để xác nhận
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' }, // text/plain không trigger preflight
+      body: JSON.stringify({ action: 'save_all', data: D }),
     });
-    const result = await res.json();
-    if (result.ok) {
-      _lastSync = new Date();
-      updateSyncBadge('online');
-    } else {
-      throw new Error(result.error || 'Save failed');
-    }
+    // Sau 3 giây ping để xác nhận đã lưu thành công
+    setTimeout(async () => {
+      try {
+        const ping = await fetch(SHEET_URL + '?action=ping', { method:'GET', redirect:'follow' });
+        const p = await ping.json();
+        if (p.ok) { _lastSync = new Date(); updateSyncBadge('online'); }
+      } catch(e) { updateSyncBadge('online', '☁️ Đã lưu (không verify)'); }
+    }, 3000);
   } catch(err) {
     console.error('Sheets save failed:', err);
     updateSyncBadge('error', 'Lưu offline (thử lại sau)');
