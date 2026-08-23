@@ -213,12 +213,16 @@ function sw(id, btn) {
   if(panel) panel.classList.add('active');
   S.activeTab = id;
 
-  if (id==='overview') { renderOverview(); }
-  else if (id==='bim') { renderBim(); }
-  else if (id==='actions') { const pid=S.activeProjectId; if(pid) ensureActions(pid).then(()=>renderActions()); else renderActions(); }
-  else if (id==='changes') { const pid=S.activeProjectId; if(pid) ensureChanges(pid).then(()=>renderChanges()); else renderChanges(); }
+  if (id==='overview')   { renderOverview(); }
+  else if (id==='bim')   { renderBim(); }
+  else if (id==='actions')   { const pid=S.activeProjectId; if(pid) ensureActions(pid).then(()=>renderActions()); else renderActions(); }
+  else if (id==='changes')   { const pid=S.activeProjectId; if(pid) ensureChanges(pid).then(()=>renderChanges()); else renderChanges(); }
   else if (id==='decisions') { const pid=S.activeProjectId; if(pid) ensureDecisions(pid).then(()=>renderDecisions()); else renderDecisions(); }
-  else if (id==='finance') { const pid=S.activeProjectId; if(pid) ensureFinance(pid).then(()=>renderFinance()); else renderFinance(); }
+  else if (id==='finance')   { const pid=S.activeProjectId; if(pid) ensureFinance(pid).then(()=>renderFinance()); else renderFinance(); }
+  else if (id==='team')      { renderTeam(); }
+  else if (id==='ma')        { renderMa(); }
+  else if (id==='schedule')  { renderSchedule(); }
+  else if (id==='report')    { renderReport(); }
 }
 
 function openModal(id) { $(id)?.classList.add('open'); }
@@ -1002,3 +1006,485 @@ window.addEventListener('online',()=>{ if(_pendingSave) boot(); });
 
 // ── INIT ──────────────────────────────────────────────────────
 boot();
+
+// ═══════════════════════════════════════════════════════════════
+// BIM LIFECYCLE — Always-accessible reference
+// ═══════════════════════════════════════════════════════════════
+const BIM_LIFECYCLE = [
+  {
+    code:'01', stage:'CONCEPT BIM',
+    question:'WHAT are we planning to build?',
+    desc:'Define zones, key objects, functions and initial project scope.',
+    color:'#E6F1FB', tc:'#0C447C',
+    governance:'Gate G01: Business Req + CAPEX + Concept Design approval',
+    dashboard:'Projects → BIM Stage 01 → Gate Evidence G01',
+  },
+  {
+    code:'02', stage:'FEASIBILITY / FS BIM',
+    question:'Is it technically and financially FEASIBLE?',
+    desc:'Validate capacity, technical assumptions, interfaces, CAPEX and business feasibility.',
+    color:'#EEEDFE', tc:'#3C3489',
+    governance:'Gate G02: Market + Technical + Financial FS + Investor Decision',
+    dashboard:'Finance → FS CAPEX baseline · Decisions → Investor approval',
+  },
+  {
+    code:'03', stage:'DESIGN BIM',
+    question:'HOW exactly will it be designed?',
+    desc:'Develop coordinated architecture, structure, MEP, specifications and detailed interfaces.',
+    color:'#EAF3DE', tc:'#27500A',
+    governance:'Gate G03: Design Freeze + Permit + BOQ + Contractor Shortlist',
+    dashboard:'Changes → Design changes with ΔCapex/ΔCapacity · Actions → RFI',
+  },
+  {
+    code:'04', stage:'CONSTRUCTION BIM',
+    question:'HOW will it be built and installed?',
+    desc:'Support coordination, clash control, shop drawings, quantities, sequencing and site execution.',
+    color:'#FAEEDA', tc:'#633806',
+    governance:'Gate G04: Contract Signed + Mobilization + QA/QC + SOP Draft',
+    dashboard:'Actions → Site issues · Changes → Variations vs Contract baseline',
+  },
+  {
+    code:'05', stage:'AS-BUILT BIM',
+    question:'WHAT was actually built?',
+    desc:'Capture the final installed condition, approved changes and verified asset information.',
+    color:'#E1F5EE', tc:'#085041',
+    governance:'Gate G05: As-Built Model + Handover Docs + Defects Closed + SOP Final',
+    dashboard:'Finance → Final Account vs Contract · Actions → Defect items',
+  },
+  {
+    code:'06', stage:'OPERATION BIM',
+    question:'HOW will the asset be operated and maintained?',
+    desc:'Connect asset data with operation, maintenance, warranty and lifecycle management.',
+    color:'#F1EFE8', tc:'#444441',
+    governance:'Gate G06: KPI Baseline + SOPs Live + Rubix 4★ Certified',
+    dashboard:'Actions → OKR/KPI items · Finance → OPEX tracking',
+  },
+];
+
+function openBimReference() {
+  const el = $('bim-ref-content');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,#1A2F5A,#3D5CF5);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:16px;text-align:center">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.1em;color:#A0AEC0;margin-bottom:4px">BUILDING INFORMATION MODELING</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">BIM Across the Project Lifecycle</div>
+      <div style="font-size:12px;color:#A0AEC0">One BIM framework — evolving information and use cases across each project phase</div>
+    </div>
+    ${BIM_LIFECYCLE.map((b,i) => `
+      <div style="display:flex;gap:12px;padding:12px 0;${i<5?'border-bottom:1px solid var(--border)':''}">
+        <div style="flex-shrink:0;text-align:center">
+          <div style="width:36px;height:36px;border-radius:50%;background:${b.color};color:${b.tc};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;margin:0 auto">${b.code}</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:9px;font-weight:700;color:${b.tc};letter-spacing:.08em;margin-bottom:2px">${b.stage}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">${b.question}</div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:6px">${b.desc}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px;background:${b.color};border-radius:6px;padding:6px 10px">
+              <div style="font-size:9px;font-weight:700;color:${b.tc};margin-bottom:2px">GOVERNANCE GATE</div>
+              <div style="font-size:11px;color:${b.tc}">${b.governance}</div>
+            </div>
+            <div style="flex:1;min-width:200px;background:var(--light);border-radius:6px;padding:6px 10px">
+              <div style="font-size:9px;font-weight:700;color:var(--muted);margin-bottom:2px">IN THIS DASHBOARD</div>
+              <div style="font-size:11px;color:var(--text)">${b.dashboard}</div>
+            </div>
+          </div>
+        </div>
+      </div>`).join('')}
+    <div style="margin-top:14px;padding:12px 14px;background:#1A2F5A;color:#fff;border-radius:8px;font-size:11px;line-height:1.7">
+      <div style="font-weight:700;margin-bottom:4px;font-size:12px">Continuous Information Development</div>
+      <div style="color:#A0AEC0">Concept Object → Feasibility Data → Design Object → Construction Object → As-Built Asset → Operational Asset</div>
+      <div style="margin-top:8px;color:#A0AEC0;font-style:italic">Key principle: BIM does not change its meaning from phase to phase. The information maturity, level of detail and BIM use cases evolve as the project progresses.</div>
+    </div>`;
+  openModal('modal-bim-ref');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEAM QT (International Team)
+// ═══════════════════════════════════════════════════════════════
+const TZ_LIST = [
+  {label:'🇻🇳 Hà Nội', tz:'Asia/Ho_Chi_Minh'},
+  {label:'🇨🇳 Thượng Hải', tz:'Asia/Shanghai'},
+  {label:'🇸🇬 Singapore', tz:'Asia/Singapore'},
+  {label:'🇯🇵 Tokyo', tz:'Asia/Tokyo'},
+  {label:'🇬🇧 London', tz:'Europe/London'},
+  {label:'🇺🇸 New York', tz:'America/New_York'},
+];
+
+// Team data stored in local S
+if (!S.team) S.team = [];
+if (!S.meetings) S.meetings = [];
+if (!S._teamCounter) S._teamCounter = 1;
+
+function renderTeam() {
+  renderClocks();
+  renderTeamList();
+  renderMeetingList();
+}
+
+function renderClocks() {
+  const el = $('tz-clocks'); if(!el) return;
+  el.innerHTML = TZ_LIST.map(tz => {
+    const now  = new Date().toLocaleString('en-US', {timeZone:tz.tz, hour:'2-digit', minute:'2-digit', hour12:false});
+    const date = new Date().toLocaleString('vi-VN', {timeZone:tz.tz, weekday:'short', day:'2-digit', month:'2-digit'});
+    const h    = parseInt(now.split(':')[0]);
+    const isWork = h>=8&&h<18;
+    return `<div class="card" style="text-align:center;border-top:3px solid ${isWork?'#0D6E4A':'#888'}">
+      <div style="font-size:11px;font-weight:600;margin-bottom:4px">${tz.label}</div>
+      <div style="font-size:22px;font-weight:700;color:${isWork?'#0D6E4A':'#888'};font-family:monospace">${now}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">${date}</div>
+      <div style="font-size:10px;margin-top:4px;color:${isWork?'#0D6E4A':'#C0392B'}">${isWork?'🟢 Working':'🔴 Off hours'}</div>
+    </div>`;
+  }).join('');
+  setTimeout(renderClocks, 30000);
+}
+
+function renderTeamList() {
+  const el = $('team-list'); if(!el) return;
+  if(!S.team.length){el.innerHTML='<div class="empty">Chưa có thành viên. + Add member để thêm.</div>';return;}
+  el.innerHTML = S.team.map(m => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+      <div style="width:34px;height:34px;border-radius:50%;background:#EEF2FF;color:#3D5CF5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${(m.name||'?').slice(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600">${m.name}</div>
+        <div style="font-size:10px;color:var(--muted)">${m.role||''} · ${m.nationality||''} · ${m.language||''}</div>
+        ${m.wechat?`<div style="font-size:10px;color:#3D5CF5">WeChat: ${m.wechat}</div>`:''}
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--muted)">${m.timezone||''}</div>
+        <span style="background:${m.status==='active'?'#E0F8EE':'#F5F5F2'};color:${m.status==='active'?'#0D6E4A':'#888'};padding:1px 7px;border-radius:10px;font-size:9px;font-weight:600">${m.status||'active'}</span>
+      </div>
+      <button onclick="openEditMember('${m.id}')" style="font-size:10px;padding:2px 6px;background:var(--light);border:0.5px solid var(--border);border-radius:4px;cursor:pointer">✏️</button>
+    </div>`).join('');
+}
+
+function renderMeetingList() {
+  const el = $('meeting-list'); if(!el) return;
+  if(!S.meetings.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:8px 0">Chưa có lịch họp định kỳ.</div>';return;}
+  const days = ['','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','CN'];
+  el.innerHTML = S.meetings.map(m=>`
+    <div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border)">
+      <div style="background:#EEF2FF;color:#3D5CF5;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;flex-shrink:0">${days[m.day]||m.day} ${m.time}</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:500">${m.name}</div>
+        ${m.link?`<a href="${m.link}" target="_blank" style="font-size:10px;color:#3D5CF5">🔗 Join</a>`:''}
+      </div>
+      <button onclick="deleteMeeting('${m.id}')" style="font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer">✕</button>
+    </div>`).join('');
+}
+
+function openAddMember() {
+  ['mb-name','mb-role','mb-nat','mb-tz','mb-lang','mb-wechat','mb-note'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('mb-status')&&($('mb-status').value='active');
+  $('mb-id-hidden')&&($('mb-id-hidden').value='');
+  $('mb-del-btn')&&($('mb-del-btn').style.display='none');
+  openModal('modal-member');
+}
+function openEditMember(id) {
+  const m=S.team.find(x=>x.id===id);if(!m)return;
+  $('mb-id-hidden')&&($('mb-id-hidden').value=m.id);
+  $('mb-name')&&($('mb-name').value=m.name||'');
+  $('mb-role')&&($('mb-role').value=m.role||'');
+  $('mb-nat')&&($('mb-nat').value=m.nationality||'');
+  $('mb-tz')&&($('mb-tz').value=m.timezone||'');
+  $('mb-lang')&&($('mb-lang').value=m.language||'');
+  $('mb-wechat')&&($('mb-wechat').value=m.wechat||'');
+  $('mb-note')&&($('mb-note').value=m.note||'');
+  $('mb-status')&&($('mb-status').value=m.status||'active');
+  $('mb-del-btn')&&($('mb-del-btn').style.display='inline-block');
+  openModal('modal-member');
+}
+function saveMember() {
+  const name=$('mb-name')?.value?.trim();if(!name){toast('Enter name',true);return;}
+  const existId=$('mb-id-hidden')?.value;
+  const id=existId||'MB-'+String(S._teamCounter++).padStart(3,'0');
+  const entry={id,name,role:$('mb-role')?.value||'',nationality:$('mb-nat')?.value||'',timezone:$('mb-tz')?.value||'',language:$('mb-lang')?.value||'',wechat:$('mb-wechat')?.value||'',note:$('mb-note')?.value||'',status:$('mb-status')?.value||'active'};
+  const idx=S.team.findIndex(x=>x.id===id);
+  if(idx>=0)S.team[idx]=entry;else S.team.push(entry);
+  closeModal('modal-member');saveLocal();renderTeamList();
+  toast((existId?'Updated':'Added')+': '+name);
+}
+function deleteMemberFromModal() {
+  const id=$('mb-id-hidden')?.value;if(!id||!confirm('Remove member?'))return;
+  S.team=S.team.filter(x=>x.id!==id);saveLocal();closeModal('modal-member');renderTeamList();
+}
+function saveMeeting() {
+  const name=$('mtg-name')?.value?.trim();if(!name){toast('Enter meeting name',true);return;}
+  const m={id:'MTG-'+Date.now(),name,time:$('mtg-time')?.value||'',day:$('mtg-day')?.value||'5',link:$('mtg-link')?.value||''};
+  S.meetings.push(m);saveLocal();
+  $('mtg-name')&&($('mtg-name').value='');$('mtg-link')&&($('mtg-link').value='');
+  renderMeetingList();toast('Meeting added ✓');
+}
+function deleteMeeting(id){S.meetings=S.meetings.filter(x=>x.id!==id);saveLocal();renderMeetingList();}
+
+// Bilingual ZH report for Team TQ
+function generateZhReport() {
+  const pid=S.activeProjectId;
+  const proj=S.projects.find(p=>p.id===pid);
+  const acts=(S._allActions[pid]||S.openActions.filter(a=>a.projectId===pid)).filter(a=>a.status!=='closed'&&a.status!=='done');
+  const chgs=(S._changes[pid]||[]).filter(c=>c.status==='pending');
+  const gate=S.gates.find(g=>g.projectId===pid&&g.stage===proj?.bimStage);
+  const bimSt=getBimStage(proj?.bimStage||'01-concept');
+  const wk=Math.ceil((new Date()-new Date(new Date().getFullYear(),0,1))/604800000);
+  const period=`Week ${wk} · ${new Date().toLocaleDateString('vi-VN')}`;
+  const txt=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🇻🇳 BÁO CÁO TUẦN · BIM Governance
+🇨🇳 每周治理报告
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 ${period}
+🏗 ${proj?.name||'—'} | ${bimSt.code} ${bimSt.name}
+📊 Gate ${gate?.gateCode||'—'}: ${gate?.readiness||0}% ready
+
+🔴 OPEN ACTIONS / 待处理事项 (${acts.length})
+${acts.slice(0,5).map(a=>`  • ${a.title}\n    A: ${a.accountable||'PMO'} | Due: ${a.dueDate||'—'}`).join('\n')||'  ✅ None'}
+
+📝 PENDING CHANGES / 待批变更 (${chgs.length})
+${chgs.slice(0,3).map(c=>`  • [${c.authorityLevel}] ${c.title}${c.deltaCapex?` | ΔCost: ${c.deltaCapex}`:''}`).join('\n')||'  ✅ None'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PMO — ${new Date().toLocaleDateString('vi-VN')}`;
+  $('zh-report-text')&&($('zh-report-text').value=txt);
+  openModal('modal-zh-report');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// M&A TRACKER
+// ═══════════════════════════════════════════════════════════════
+if(!S.ma)S.ma=[];if(!S._maCounter)S._maCounter=1;
+const MA_STAGES=[
+  {id:'sourcing',label:'🔍 Sourcing',color:'#888',bg:'#F5F5F2'},
+  {id:'outreach',label:'📞 Outreach',color:'#3D5CF5',bg:'#EEF2FF'},
+  {id:'dd',label:'🔬 Due Diligence',color:'#B86B00',bg:'#FFF3DC'},
+  {id:'negotiation',label:'🤝 Negotiation',color:'#633806',bg:'#FDF0E0'},
+  {id:'closed',label:'✅ Closed',color:'#0D6E4A',bg:'#E0F8EE'},
+];
+const MA_TYPES={'cleaning':'🧹 Vệ sinh CN','events':'🎪 Sự kiện','other':'🏢 Khác'};
+
+function renderMa() {
+  const el=$('ma-kanban');if(!el)return;
+  el.innerHTML=MA_STAGES.map(st=>{
+    const cards=S.ma.filter(c=>c.stage===st.id);
+    return `<div style="background:var(--light);border:0.5px solid var(--border);border-radius:10px;padding:10px;flex:1;min-width:140px">
+      <div style="font-size:10px;font-weight:700;color:${st.color};margin-bottom:8px;display:flex;justify-content:space-between">
+        <span>${st.label}</span><span style="background:${st.bg};color:${st.color};padding:1px 6px;border-radius:8px">${cards.length}</span>
+      </div>
+      ${cards.map(c=>`
+        <div onclick="openEditMa('${c.id}')" style="background:var(--white);border:1px solid var(--border);border-left:3px solid ${st.color};border-radius:6px;padding:8px;margin-bottom:6px;cursor:pointer">
+          <div style="font-size:11px;font-weight:600;margin-bottom:3px">${c.name}</div>
+          <div style="font-size:10px;color:var(--muted)">${MA_TYPES[c.type]||c.type}</div>
+          ${c.score?`<div style="font-size:10px;font-weight:700;color:${+c.score>=70?'#0D6E4A':+c.score>=55?'#B86B00':'#C0392B'};margin-top:3px">DD: ${c.score}/100</div>`:''}
+          ${c.note?`<div style="font-size:9px;color:var(--muted);margin-top:3px">${c.note.slice(0,50)}</div>`:''}
+        </div>`).join('')||`<div style="font-size:10px;color:var(--muted);text-align:center;padding:10px">—</div>`}
+    </div>`;
+  }).join('');
+  // Summary table
+  const tbl=$('ma-table');if(!tbl)return;
+  if(!S.ma.length){tbl.innerHTML='<div class="empty">No M&A targets yet.</div>';return;}
+  tbl.innerHTML=`<table class="tbl" style="width:100%"><thead><tr><th>Company</th><th>Type</th><th>Stage</th><th>DD Score</th><th>Valuation</th><th>Contact</th><th>Note</th><th></th></tr></thead><tbody>
+    ${S.ma.map(c=>{
+      const st=MA_STAGES.find(s=>s.id===c.stage)||MA_STAGES[0];
+      return `<tr>
+        <td style="font-weight:600">${c.name}</td>
+        <td>${MA_TYPES[c.type]||c.type}</td>
+        <td><span class="pill" style="background:${st.bg};color:${st.color}">${st.label}</span></td>
+        <td style="font-weight:700;color:${+c.score>=70?'#0D6E4A':+c.score>=55?'#B86B00':'#C0392B'}">${c.score||'—'}</td>
+        <td>${c.valuation?Number(c.valuation).toLocaleString('vi-VN')+' tr':'—'}</td>
+        <td style="font-size:11px">${c.contact||'—'}</td>
+        <td style="font-size:11px;max-width:150px">${c.note||'—'}</td>
+        <td><button onclick="openEditMa('${c.id}')" style="font-size:10px;padding:2px 6px;background:var(--light);border:0.5px solid var(--border);border-radius:4px;cursor:pointer">✏️</button></td>
+      </tr>`;
+    }).join('')}
+  </tbody></table>`;
+}
+
+function openAddMa(){
+  ['ma-name','ma-location','ma-contact','ma-valuation','ma-note'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('ma-score')&&($('ma-score').value='');
+  $('ma-type')&&($('ma-type').value='cleaning');
+  $('ma-stage')&&($('ma-stage').value='sourcing');
+  $('ma-id-hidden')&&($('ma-id-hidden').value='');
+  $('ma-del-btn')&&($('ma-del-btn').style.display='none');
+  openModal('modal-ma');
+}
+function openEditMa(id){
+  const c=S.ma.find(x=>x.id===id);if(!c)return;
+  $('ma-id-hidden')&&($('ma-id-hidden').value=c.id);
+  $('ma-name')&&($('ma-name').value=c.name||'');
+  $('ma-type')&&($('ma-type').value=c.type||'cleaning');
+  $('ma-stage')&&($('ma-stage').value=c.stage||'sourcing');
+  $('ma-location')&&($('ma-location').value=c.location||'');
+  $('ma-score')&&($('ma-score').value=c.score||'');
+  $('ma-valuation')&&($('ma-valuation').value=c.valuation||'');
+  $('ma-contact')&&($('ma-contact').value=c.contact||'');
+  $('ma-note')&&($('ma-note').value=c.note||'');
+  $('ma-del-btn')&&($('ma-del-btn').style.display='inline-block');
+  openModal('modal-ma');
+}
+function saveMa(){
+  const name=$('ma-name')?.value?.trim();if(!name){toast('Enter company name',true);return;}
+  const existId=$('ma-id-hidden')?.value;
+  const id=existId||'MA-'+String(S._maCounter++).padStart(3,'0');
+  const entry={id,name,type:$('ma-type')?.value||'cleaning',stage:$('ma-stage')?.value||'sourcing',location:$('ma-location')?.value||'',score:+($('ma-score')?.value||0),valuation:+($('ma-valuation')?.value||0),contact:$('ma-contact')?.value||'',note:$('ma-note')?.value||''};
+  const idx=S.ma.findIndex(x=>x.id===id);
+  if(idx>=0)S.ma[idx]=entry;else S.ma.push(entry);
+  closeModal('modal-ma');saveLocal();renderMa();
+  toast((existId?'Updated':'Added')+': '+name);
+}
+function deleteMaFromModal(){
+  const id=$('ma-id-hidden')?.value;if(!id||!confirm('Delete?'))return;
+  S.ma=S.ma.filter(x=>x.id!==id);saveLocal();closeModal('modal-ma');renderMa();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCHEDULE — Payment + PMO Todos
+// ═══════════════════════════════════════════════════════════════
+if(!S.payments)S.payments=[];if(!S.todos)S.todos=[];
+if(!S._payCounter)S._payCounter=1;if(!S._todoCounter)S._todoCounter=1;
+
+function daysLeft(due){if(!due)return null;return Math.ceil((new Date(due)-new Date().setHours(0,0,0,0))/86400000);}
+function payStatus(p){
+  if(p.status==='paid')return{label:'✅ Paid',c:'#0D6E4A',bg:'#E0F8EE'};
+  const d=daysLeft(p.due);
+  if(d===null)return{label:'⏳ Pending',c:'#888',bg:'#F5F5F2'};
+  if(d<0)return{label:`🔴 ${Math.abs(d)}d overdue`,c:'#C0392B',bg:'#FCEBEB'};
+  if(d<=3)return{label:`🟠 ${d}d left`,c:'#C0392B',bg:'#FCEBEB'};
+  if(d<=7)return{label:`🟡 ${d}d left`,c:'#B86B00',bg:'#FFF3DC'};
+  return{label:`⏳ ${d}d`,c:'#3D5CF5',bg:'#EEF2FF'};
+}
+
+function renderSchedule(){renderPayments();renderTodos();}
+
+function renderPayments(){
+  const el=$('payment-list');if(!el)return;
+  const list=[...S.payments].sort((a,b)=>{
+    if(a.status==='paid'&&b.status!=='paid')return 1;
+    if(b.status==='paid'&&a.status!=='paid')return -1;
+    return new Date(a.due||'9999')-new Date(b.due||'9999');
+  });
+  if(!list.length){el.innerHTML='<div class="empty">No payments scheduled.</div>';return;}
+  el.innerHTML=list.map(p=>{
+    const st=payStatus(p);
+    const proj=S.projects.find(x=>x.id===p.projectId);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:0.5px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600">${p.name}</div>
+        <div style="font-size:10px;color:var(--muted)">${proj?.name||'General'}${p.recur?` · 🔁 ${p.recur}`:''}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;font-weight:700;color:#1A2F5A">${p.amount?Number(p.amount).toLocaleString('vi-VN')+' tr':''}</div>
+        <span style="background:${st.bg};color:${st.c};padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600">${st.label}</span>
+      </div>
+      ${p.status!=='paid'?`<button onclick="markPaid('${p.id}')" style="font-size:10px;padding:3px 8px;background:#E0F8EE;color:#0D6E4A;border:1px solid #0D6E4A;border-radius:4px;cursor:pointer">✓ Paid</button>`:''}
+      <button onclick="deletePayment('${p.id}')" style="font-size:10px;background:none;border:none;color:var(--muted);cursor:pointer">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function markPaid(id){
+  const p=S.payments.find(x=>x.id===id);if(!p)return;
+  p.status='paid';
+  if(p.recur){
+    const next=new Date(p.due);
+    if(p.recur==='monthly')next.setMonth(next.getMonth()+1);
+    else if(p.recur==='quarterly')next.setMonth(next.getMonth()+3);
+    S.payments.push({...p,id:'PAY-'+String(S._payCounter++).padStart(3,'0'),status:'pending',due:next.toISOString().split('T')[0]});
+  }
+  saveLocal();renderPayments();toast('Marked as paid ✓');
+}
+function deletePayment(id){S.payments=S.payments.filter(x=>x.id!==id);saveLocal();renderPayments();}
+function openAddPayment(){
+  ['pay-name','pay-amount','pay-due','pay-note'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('pay-status')&&($('pay-status').value='pending');
+  $('pay-recur')&&($('pay-recur').value='');
+  populatePayProject();
+  openModal('modal-payment');
+}
+function populatePayProject(){
+  const el=$('pay-project');if(!el)return;
+  el.innerHTML=`<option value="">— General —</option>`+S.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+}
+function savePayment(){
+  const name=$('pay-name')?.value?.trim();if(!name){toast('Enter payment name',true);return;}
+  const entry={id:'PAY-'+String(S._payCounter++).padStart(3,'0'),name,projectId:$('pay-project')?.value||'',amount:+($('pay-amount')?.value||0),due:$('pay-due')?.value||'',recur:$('pay-recur')?.value||'',status:'pending',note:$('pay-note')?.value||''};
+  S.payments.push(entry);saveLocal();closeModal('modal-payment');renderPayments();toast('Payment added ✓');
+}
+
+function renderTodos(){
+  const el=$('todo-list');if(!el)return;
+  const list=[...S.todos].filter(t=>!t.done).sort((a,b)=>({high:0,med:1,low:2}[a.priority]||1)-({high:0,med:1,low:2}[b.priority]||1));
+  if(!list.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:12px">🎉 No pending tasks.</div>';return;}
+  const pCfg={high:{c:'#C0392B',bg:'#FCEBEB'},med:{c:'#B86B00',bg:'#FFF3DC'},low:{c:'#0D6E4A',bg:'#E0F8EE'}};
+  el.innerHTML=list.map(t=>{
+    const pr=pCfg[t.priority]||pCfg.med;
+    const d=daysLeft(t.due);
+    const overdue=d!==null&&d<0;
+    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 14px;border-bottom:0.5px solid var(--border)">
+      <input type="checkbox" onchange="completeTodo('${t.id}')" style="margin-top:3px;accent-color:#3D5CF5;width:14px;height:14px">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600">${t.title}</div>
+        <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap">
+          <span style="background:${pr.bg};color:${pr.c};padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600">${t.priority?.toUpperCase()}</span>
+          ${t.due?`<span style="font-size:10px;color:${overdue?'#C0392B':'var(--muted)'}">Due: ${t.due}${overdue?' ⚠️':''}</span>`:''}
+          ${t.note?`<span style="font-size:10px;color:var(--muted)">${t.note}</span>`:''}
+        </div>
+      </div>
+      <button onclick="deleteTodo('${t.id}')" style="font-size:10px;background:none;border:none;color:var(--muted);cursor:pointer">✕</button>
+    </div>`;
+  }).join('');
+}
+function completeTodo(id){const t=S.todos.find(x=>x.id===id);if(t){t.done=true;saveLocal();renderTodos();toast('Task done ✓');}}
+function deleteTodo(id){S.todos=S.todos.filter(x=>x.id!==id);saveLocal();renderTodos();}
+function openAddTodo(){
+  ['todo-title','todo-due','todo-note'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  $('todo-priority')&&($('todo-priority').value='med');
+  openModal('modal-todo');
+}
+function saveTodo(){
+  const title=$('todo-title')?.value?.trim();if(!title){toast('Enter task',true);return;}
+  S.todos.push({id:'TODO-'+String(S._todoCounter++).padStart(3,'0'),title,priority:$('todo-priority')?.value||'med',due:$('todo-due')?.value||'',note:$('todo-note')?.value||'',done:false});
+  saveLocal();closeModal('modal-todo');renderTodos();toast('Task added ✓');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPORT
+// ═══════════════════════════════════════════════════════════════
+function renderReport(){
+  const pid=S.activeProjectId;
+  const proj=S.projects.find(p=>p.id===pid);
+  const acts=(S._allActions[pid]||S.openActions.filter(a=>a.projectId===pid)).filter(a=>a.priority==='high'&&a.status!=='closed');
+  const dec=S.pendingDecisions.filter(d=>d.projectId===pid);
+  const fin=S._finance[pid]||[];
+  const cur=fin.find(f=>f.isCurrent==='TRUE'||f.isCurrent===true);
+  const bimSt=getBimStage(proj?.bimStage||'01-concept');
+  const gate=S.gates.find(g=>g.projectId===pid&&g.stage===proj?.bimStage);
+  const wk=Math.ceil((new Date()-new Date(new Date().getFullYear(),0,1))/604800000);
+  const rpt=`BÁO CÁO VẬN HÀNH TUẦN · ${new Date().toLocaleDateString('vi-VN')}
+Week ${wk} · PMO — BIM × 8×5 × Tgq
+${'═'.repeat(50)}
+
+🏗 DỰ ÁN: ${proj?.name||'—'}
+   BIM Stage: ${bimSt.code} ${bimSt.name}
+   Gate ${gate?.gateCode||'—'}: ${gate?.readiness||0}% ready · ${GATE_STATUS[gate?.status||'not-ready']?.label||'—'}
+   CAPEX Baseline: ${cur?Number(cur.amount).toLocaleString('vi-VN')+' tr.đ':'Chưa có baseline'}
+
+🔴 HIGH-PRIORITY ACTIONS (${acts.length})
+${acts.slice(0,5).map(a=>`   • ${a.title}\n     A: ${a.accountable||'PMO'} · Due: ${a.dueDate||'—'}`).join('\n')||'   ✅ Không có action khẩn cấp'}
+
+⚖️ PENDING DECISIONS (${dec.length})
+${dec.slice(0,3).map(d=>`   • [${d.authorityLevel}] ${d.subject}\n     Due: ${d.dueDate||'—'} · A: ${d.accountable||'CĐT'}`).join('\n')||'   ✅ Không có decision đang chờ'}
+
+${cur&&cur.actual?`💰 FINANCE
+   Baseline: ${Number(cur.amount).toLocaleString('vi-VN')} tr.đ
+   Actual: ${Number(cur.actual).toLocaleString('vi-VN')} tr.đ
+   Δ: ${((+cur.actual-+cur.amount)/+cur.amount*100).toFixed(1)}%`:''}
+
+${'═'.repeat(50)}
+PMO · ${new Date().toLocaleDateString('vi-VN')}`;
+  const el=$('report-preview');if(el)el.value=rpt;
+}
+
+function copyReport(){
+  const el=$('report-preview');if(!el)return;
+  navigator.clipboard.writeText(el.value).then(()=>toast('Copied to clipboard ✓'));
+}
+
