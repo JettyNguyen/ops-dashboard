@@ -218,7 +218,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
@@ -397,7 +397,10 @@ function sw(id, btn) {
   if(id==='ma') renderMa();
 }
 
-function openModal(id) { $(id).classList.add('open'); }
+function openModal(id) {
+  if(id==='modal-8x5') renderHelpModal();
+  $(id).classList.add('open');
+}
 function closeModal(id) { $(id).classList.remove('open'); }
 function setFilter(f, el) {
   D.activeFilter = f;
@@ -2007,13 +2010,6 @@ function showHelpTab(id, btn) {
   const el = document.getElementById('help-'+id);
   if(el) el.style.display='block';
   btn.classList.add('on');
-}
-
-// Hook vào openModal để render lazy
-const _origOpenModal = openModal;
-function openModal(id) {
-  if(id==='modal-8x5') renderHelpModal();
-  _origOpenModal(id);
 }
 
 loadFromSheets().then(() => refreshAll());
