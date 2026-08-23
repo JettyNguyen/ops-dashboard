@@ -140,8 +140,136 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff
     <div class="card"><div class="card-title">Health Score — 8 Trục BE</div><div id="health-chart"></div></div>
     <div class="card"><div class="card-title" id="alert-title">Cảnh báo hệ thống</div><div id="alerts-box"></div></div>
   </div>
-  <div class="sec" id="snapshot-title">📋 Snapshot Site</div>
+  <!-- Lịch thanh toán + Nhắc việc -->
+  <div class="g2" style="margin-top:14px">
+    <!-- THANH TOÁN -->
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="background:#1A2F5A;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="color:#fff;font-size:13px;font-weight:600">💳 Lịch thanh toán</div>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:none;font-size:11px" onclick="openAddPayment()">+ Thêm</button>
+      </div>
+      <div style="padding:8px 0" id="payment-filters" style="display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid #F0F0F0">
+        <div style="display:flex;gap:5px;padding:6px 14px;border-bottom:1px solid #F0F0F0;flex-wrap:wrap">
+          <span class="filter-chip active" style="font-size:10px" onclick="setPayFilter('all',this)">Tất cả</span>
+          <span class="filter-chip" style="font-size:10px" onclick="setPayFilter('upcoming',this)">⏰ Sắp đến</span>
+          <span class="filter-chip" style="font-size:10px" onclick="setPayFilter('overdue',this)">🔴 Quá hạn</span>
+          <span class="filter-chip" style="font-size:10px" onclick="setPayFilter('paid',this)">✅ Đã TT</span>
+        </div>
+      </div>
+      <div id="payment-list" style="max-height:320px;overflow-y:auto"></div>
+    </div>
+
+    <!-- NHẮC VIỆC -->
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="background:#3D5CF5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="color:#fff;font-size:13px;font-weight:600">✅ Nhắc việc PMO</div>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:none;font-size:11px" onclick="openAddTodo()">+ Thêm</button>
+      </div>
+      <div style="display:flex;gap:5px;padding:6px 14px;border-bottom:1px solid #F0F0F0;flex-wrap:wrap">
+        <span class="filter-chip active" style="font-size:10px" onclick="setTodoFilter('all',this)">Tất cả</span>
+        <span class="filter-chip" style="font-size:10px" onclick="setTodoFilter('today',this)">Hôm nay</span>
+        <span class="filter-chip" style="font-size:10px" onclick="setTodoFilter('week',this)">Tuần này</span>
+        <span class="filter-chip" style="font-size:10px" onclick="setTodoFilter('done',this)">✅ Xong</span>
+      </div>
+      <div id="todo-list" style="max-height:320px;overflow-y:auto;padding:6px 0"></div>
+    </div>
+  </div>
+
+  <div class="sec" id="snapshot-title" style="margin-top:14px">📋 Snapshot Site</div>
   <div id="site-snapshot" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px"></div>
+</div>
+
+<!-- MODAL: Thêm thanh toán -->
+<div class="overlay" id="modal-payment">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-pay-title">Thêm lịch thanh toán</div>
+      <button class="close-btn" onclick="closeModal('modal-payment')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Nội dung thanh toán *</label><input type="text" id="pay-name" placeholder="VD: Tiền thuê mặt bằng T23 tháng 8"></div>
+        <div class="field"><label class="lbl">Site liên quan</label>
+          <select id="pay-site">
+            <option value="">— Chung —</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Loại</label>
+          <select id="pay-type">
+            <option value="thue">🏢 Thuê mặt bằng</option>
+            <option value="nha-thau">🔨 Nhà thầu / thi công</option>
+            <option value="dich-vu">🧹 Dịch vụ định kỳ</option>
+            <option value="thue">💡 Điện / Nước / Phí DV</option>
+            <option value="luong">👥 Lương / Nhân sự</option>
+            <option value="khac">📦 Khác</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Số tiền (tr.đ)</label><input type="number" id="pay-amount" placeholder="0" min="0"></div>
+        <div class="field"><label class="lbl">Ngày đến hạn *</label><input type="date" id="pay-due"></div>
+        <div class="field"><label class="lbl">Lặp lại</label>
+          <select id="pay-recur">
+            <option value="">Không lặp</option>
+            <option value="monthly">Hàng tháng</option>
+            <option value="quarterly">Hàng quý</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Trạng thái</label>
+          <select id="pay-status">
+            <option value="unpaid">⏳ Chưa thanh toán</option>
+            <option value="paid">✅ Đã thanh toán</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Ghi chú</label><input type="text" id="pay-note" placeholder="Số hóa đơn, người duyệt..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-payment')">Hủy</button>
+      <button class="btn btn-red btn-sm" id="pay-del-btn" style="display:none" onclick="deletePayFromModal()">🗑 Xóa</button>
+      <button class="btn btn-primary" onclick="savePayment()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Thêm nhắc việc -->
+<div class="overlay" id="modal-todo">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-todo-title">Thêm nhắc việc</div>
+      <button class="close-btn" onclick="closeModal('modal-todo')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Nội dung việc cần làm *</label><input type="text" id="todo-name" placeholder="VD: Gửi báo cáo tuần cho CĐT"></div>
+        <div class="field"><label class="lbl">Ưu tiên</label>
+          <select id="todo-priority">
+            <option value="high">🔴 Cao — làm ngay</option>
+            <option value="med" selected>🟡 Vừa</option>
+            <option value="low">🟢 Thấp</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Deadline</label><input type="date" id="todo-due"></div>
+        <div class="field"><label class="lbl">Nhắc lại</label>
+          <select id="todo-recur">
+            <option value="">Không lặp</option>
+            <option value="daily">Hàng ngày</option>
+            <option value="weekly">Hàng tuần</option>
+            <option value="monthly">Hàng tháng</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Site liên quan</label>
+          <select id="todo-site">
+            <option value="">— Chung —</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Ghi chú</label><input type="text" id="todo-note" placeholder="Chi tiết thêm..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-todo')">Hủy</button>
+      <button class="btn btn-red btn-sm" id="todo-del-btn" style="display:none" onclick="deleteTodoFromModal()">🗑 Xóa</button>
+      <button class="btn btn-primary" onclick="saveTodo()">💾 Lưu</button>
+    </div>
+  </div>
 </div>
 
 <!-- SITES -->

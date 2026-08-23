@@ -199,6 +199,9 @@ let D = {
     {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.3: Ra mắt gói dịch vụ trọn gói (hành chính + kế toán + pháp lý)',truc:'FE2',owner:'PMO',target:1,unit:'gói DV',actual:0},
     {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.4: ≥2 khách hàng thử nghiệm gói dịch vụ trọn gói',truc:'FE3',owner:'PMO + Sales',target:2,unit:'KH',actual:0},
   ],
+  payments: [], payCounter: 1, payFilter: 'all',
+  todos: [], todoCounter: 1, todoFilter: 'all',
+  editingPayId: null, editingTodoId: null,
   ma: [], maCounter: 1,
   maFilter: 'all',
   editingMaId: null,
@@ -212,7 +215,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
@@ -277,6 +280,8 @@ async function loadFromSheets() {
         Object.keys(data.health).forEach(k => { D.health[k] = +data.health[k] || 3; });
       }
       if (data.meta && data.meta.changeCounter) D.changeCounter = +data.meta.changeCounter || 1;
+      if (data.payments && data.payments.length) D.payments = data.payments;
+      if (data.todos && data.todos.length) D.todos = data.todos;
       if (data.ma && data.ma.length) D.ma = data.ma;
       if (data.meta && data.meta.maCounter) D.maCounter = +data.meta.maCounter || 1;
 
@@ -428,7 +433,7 @@ function renderOverview() {
     <div class="kpi-label">${k.lbl}</div>
     <div style="font-size:10px;color:#6B6B6B;margin-top:2px">${k.sub}</div>
   </div>`).join('');
-  renderHealth(); renderAlerts(); renderSnapshot();
+  renderHealth(); renderAlerts(); renderPayments(); renderTodos(); renderSnapshot();
 }
 
 function renderHealth() {
@@ -472,6 +477,16 @@ function renderAlerts() {
     if(tzWarning) al.push({t:'warn',m:{vi:'Team TQ GMT+8 — lịch họp chênh 1h so với VN',en:'CN team GMT+8 — 1h ahead of VN',zh:'中国团队 GMT+8 — 比越南早1小时'}});
   }
   if(D.changes.length>0) al.push({t:'ok',m:{vi:`Change Log: ${D.changes.length} logged`,en:`Change Log: ${D.changes.length} recorded`,zh:`变更日志: ${D.changes.length} 条`}});
+  // Payment alerts
+  const overduePays = D.payments.filter(p=>p.status!=='paid'&&getDaysLeft(p.due)<0);
+  const dueSoon = D.payments.filter(p=>p.status!=='paid'&&getDaysLeft(p.due)>=0&&getDaysLeft(p.due)<=3);
+  if(overduePays.length>0) al.push({t:'err',m:{vi:`💳 ${overduePays.length} khoản thanh toán quá hạn!`,en:`💳 ${overduePays.length} overdue payments!`,zh:`💳 ${overduePays.length} 笔付款已逾期！`}});
+  if(dueSoon.length>0) al.push({t:'warn',m:{vi:`💳 ${dueSoon.length} khoản TT đến hạn trong 3 ngày`,en:`💳 ${dueSoon.length} payments due in 3 days`,zh:`💳 ${dueSoon.length} 笔付款3天内到期`}});
+  // Todo alerts
+  const overdueTodos = D.todos.filter(td=>!td.done&&td.due&&getDaysLeft(td.due)<0&&td.priority==='high');
+  const todayTodos = D.todos.filter(td=>!td.done&&td.due===new Date().toISOString().split('T')[0]);
+  if(overdueTodos.length>0) al.push({t:'err',m:{vi:`✅ ${overdueTodos.length} việc ưu tiên cao đã quá hạn!`,en:`✅ ${overdueTodos.length} high-priority tasks overdue!`,zh:`✅ ${overdueTodos.length} 项高优先级任务已逾期！`}});
+  if(todayTodos.length>0) al.push({t:'warn',m:{vi:`✅ ${todayTodos.length} việc cần làm hôm nay`,en:`✅ ${todayTodos.length} tasks due today`,zh:`✅ ${todayTodos.length} 项任务今天到期`}});
   $('alerts-box').innerHTML = al.map(a => `<div class="alert a-${a.t}">${a.t==='err'?'⚠️':a.t==='warn'?'🔔':'✅'} ${a.m[lang]||a.m.vi}</div>`).join('');
 }
 
@@ -983,6 +998,291 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 // Khởi động: load từ Sheets trước
+// ═══════════════════════════════════════════════════════════════
+// LỊCH THANH TOÁN
+// ═══════════════════════════════════════════════════════════════
+
+const PAY_TYPES = {
+  'thue':'🏢 Thuê MB', 'nha-thau':'🔨 Nhà thầu',
+  'dich-vu':'🧹 Dịch vụ', 'dien-nuoc':'💡 Điện/Nước',
+  'luong':'👥 Nhân sự', 'khac':'📦 Khác',
+};
+
+function getDaysLeft(due) {
+  if (!due) return null;
+  return Math.ceil((new Date(due) - new Date().setHours(0,0,0,0)) / 86400000);
+}
+
+function payStatus(p) {
+  if (p.status === 'paid') return { label:'✅ Đã TT', color:'#0D6E4A', bg:'#E0F8EE' };
+  const d = getDaysLeft(p.due);
+  if (d === null) return { label:'⏳ Chưa TT', color:'#6B6B6B', bg:'#F5F5F2' };
+  if (d < 0)  return { label:`🔴 Quá hạn ${Math.abs(d)}d`, color:'#C0392B', bg:'#FCEBEB' };
+  if (d <= 3) return { label:`🟠 Còn ${d}d`, color:'#C0392B', bg:'#FCEBEB' };
+  if (d <= 7) return { label:`🟡 Còn ${d}d`, color:'#B86B00', bg:'#FFF3DC' };
+  return { label:`⏳ Còn ${d}d`, color:'#3D5CF5', bg:'#EEF2FF' };
+}
+
+function setPayFilter(f, btn) {
+  D.payFilter = f;
+  document.querySelectorAll('#payment-filters .filter-chip, #panel-overview .filter-chip').forEach(b => {
+    if (b.closest('#payment-list') || b.onclick?.toString().includes('setPayFilter')) b.classList.remove('active');
+  });
+  // simpler: re-query by parent
+  btn.parentElement.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPayments();
+}
+
+function renderPayments() {
+  const now = new Date().setHours(0,0,0,0);
+  let list = [...D.payments].sort((a,b) => {
+    if (a.status==='paid' && b.status!=='paid') return 1;
+    if (b.status==='paid' && a.status!=='paid') return -1;
+    return new Date(a.due||'9999') - new Date(b.due||'9999');
+  });
+
+  if (D.payFilter === 'upcoming') list = list.filter(p => p.status!=='paid' && getDaysLeft(p.due)>=0 && getDaysLeft(p.due)<=14);
+  else if (D.payFilter === 'overdue') list = list.filter(p => p.status!=='paid' && getDaysLeft(p.due)<0);
+  else if (D.payFilter === 'paid') list = list.filter(p => p.status==='paid');
+
+  // Badge tổng quá hạn lên KPI
+  const overdue = D.payments.filter(p => p.status!=='paid' && getDaysLeft(p.due)<0).length;
+  const soonDue = D.payments.filter(p => p.status!=='paid' && getDaysLeft(p.due)>=0 && getDaysLeft(p.due)<=3).length;
+
+  if (!list.length) {
+    $('payment-list').innerHTML = `<div style="font-size:11px;color:#aaa;text-align:center;padding:20px">Chưa có lịch thanh toán nào.</div>`;
+    return;
+  }
+
+  $('payment-list').innerHTML = list.map(p => {
+    const st = payStatus(p);
+    const site = D.sites.find(s=>s.id===p.siteId);
+    const isPaid = p.status==='paid';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #F5F5F2;${isPaid?'opacity:0.55':''}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:#1A1A1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:10px;color:#6B6B6B;margin-top:2px">
+          ${site?`<span style="color:#3D5CF5">${site.name}</span> · `:''}
+          ${PAY_TYPES[p.type]||p.type||''}
+          ${p.recur==='monthly'?' · 🔁 Hàng tháng':p.recur==='quarterly'?' · 🔁 Hàng quý':''}
+        </div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:12px;font-weight:700;color:#1A2F5A">${p.amount?Number(p.amount).toLocaleString('vi-VN')+' tr':''}</div>
+        <div style="font-size:10px;margin-top:2px"><span style="background:${st.bg};color:${st.color};padding:1px 7px;border-radius:10px;font-weight:600">${st.label}</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0">
+        ${!isPaid?`<button onclick="markPaid('${p.id}')" style="font-size:10px;padding:2px 6px;background:#E0F8EE;color:#0D6E4A;border:1px solid #0D6E4A;border-radius:4px;cursor:pointer">✓ TT</button>`:''}
+        <button onclick="openEditPayment('${p.id}')" style="font-size:10px;padding:2px 6px;background:#F5F5F2;color:#3D5CF5;border:1px solid #ddd;border-radius:4px;cursor:pointer">✏️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markPaid(id) {
+  const p = D.payments.find(x=>x.id===id); if(!p) return;
+  p.status = 'paid'; p.paidAt = today();
+  // Nếu lặp lại → tự tạo kỳ tiếp
+  if (p.recur === 'monthly' || p.recur === 'quarterly') {
+    const next = new Date(p.due);
+    if (p.recur === 'monthly') next.setMonth(next.getMonth()+1);
+    else next.setMonth(next.getMonth()+3);
+    D.payments.push({...p, id:'PAY-'+String(D.payCounter++).padStart(3,'0'),
+      status:'unpaid', due:next.toISOString().split('T')[0], paidAt:''});
+  }
+  renderPayments(); saveAll(); toast('✅ Đã đánh dấu thanh toán');
+}
+
+function populatePaySiteSelect(selId) {
+  const el = $(selId); if(!el) return;
+  el.innerHTML = '<option value="">— Chung —</option>' +
+    D.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function openAddPayment() {
+  D.editingPayId = null;
+  $('modal-pay-title').textContent = 'Thêm lịch thanh toán';
+  $('pay-del-btn').style.display = 'none';
+  ['pay-name','pay-note'].forEach(id=>$(id).value='');
+  $('pay-amount').value=''; $('pay-type').value='thue';
+  $('pay-status').value='unpaid'; $('pay-recur').value='';
+  $('pay-due').value = '';
+  populatePaySiteSelect('pay-site');
+  openModal('modal-payment');
+}
+
+function openEditPayment(id) {
+  const p = D.payments.find(x=>x.id===id); if(!p) return;
+  D.editingPayId = id;
+  $('modal-pay-title').textContent = 'Sửa: '+p.name;
+  $('pay-del-btn').style.display = 'inline-block';
+  populatePaySiteSelect('pay-site');
+  $('pay-name').value = p.name||''; $('pay-type').value = p.type||'thue';
+  $('pay-amount').value = p.amount||''; $('pay-due').value = p.due||'';
+  $('pay-recur').value = p.recur||''; $('pay-status').value = p.status||'unpaid';
+  $('pay-site').value = p.siteId||''; $('pay-note').value = p.note||'';
+  openModal('modal-payment');
+}
+
+function savePayment() {
+  const name = $('pay-name').value.trim();
+  if (!name) { toast('Nhập nội dung thanh toán', true); return; }
+  const entry = {
+    id: D.editingPayId || ('PAY-'+String(D.payCounter++).padStart(3,'0')),
+    name, type:$('pay-type').value, amount:+$('pay-amount').value||0,
+    due:$('pay-due').value, recur:$('pay-recur').value,
+    status:$('pay-status').value, siteId:$('pay-site').value,
+    note:$('pay-note').value, updatedAt:today(),
+  };
+  if (D.editingPayId) { const i=D.payments.findIndex(x=>x.id===D.editingPayId); if(i>=0) D.payments[i]=entry; }
+  else D.payments.push(entry);
+  closeModal('modal-payment'); renderPayments(); saveAll();
+  toast((D.editingPayId?'Đã cập nhật':'Đã thêm')+': '+name);
+}
+
+function deletePayFromModal() {
+  if(!D.editingPayId) return;
+  const p = D.payments.find(x=>x.id===D.editingPayId);
+  if(!p||!confirm(`Xóa "${p.name}"?`)) return;
+  D.payments = D.payments.filter(x=>x.id!==D.editingPayId);
+  closeModal('modal-payment'); renderPayments(); saveAll(); toast('Đã xóa '+p.name);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NHẮC VIỆC PMO
+// ═══════════════════════════════════════════════════════════════
+
+const PRIORITY_CFG = {
+  high: { label:'🔴 Cao', color:'#C0392B', bg:'#FCEBEB' },
+  med:  { label:'🟡 Vừa', color:'#B86B00', bg:'#FFF3DC' },
+  low:  { label:'🟢 Thấp', color:'#0D6E4A', bg:'#E0F8EE' },
+};
+
+function setTodoFilter(f, btn) {
+  D.todoFilter = f;
+  btn.parentElement.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTodos();
+}
+
+function renderTodos() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate()+7);
+  const weekStr = weekEnd.toISOString().split('T')[0];
+
+  let list = [...D.todos].sort((a,b) => {
+    if (a.done && !b.done) return 1; if (!a.done && b.done) return -1;
+    const pa = {high:0,med:1,low:2}[a.priority]??1;
+    const pb = {high:0,med:1,low:2}[b.priority]??1;
+    if (pa!==pb) return pa-pb;
+    return (a.due||'9999').localeCompare(b.due||'9999');
+  });
+
+  if (D.todoFilter==='today') list = list.filter(t => !t.done && t.due===todayStr);
+  else if (D.todoFilter==='week') list = list.filter(t => !t.done && t.due && t.due<=weekStr);
+  else if (D.todoFilter==='done') list = list.filter(t => t.done);
+  else list = list.filter(t => !t.done); // 'all' = chưa xong
+
+  if (!list.length) {
+    $('todo-list').innerHTML = `<div style="font-size:11px;color:#aaa;text-align:center;padding:20px">${D.todoFilter==='done'?'Chưa có việc nào hoàn thành.':'Không có việc nào. Tốt lắm! 🎉'}</div>`;
+    return;
+  }
+
+  $('todo-list').innerHTML = list.map(td => {
+    const pr = PRIORITY_CFG[td.priority]||PRIORITY_CFG.med;
+    const d = getDaysLeft(td.due);
+    const dLabel = td.due ? (d<0?`🔴 Quá ${Math.abs(d)}d`:d===0?'🔴 Hôm nay':d===1?'🟠 Ngày mai':`${d}d nữa`) : '';
+    const dColor = d!==null&&d<=0?'#C0392B':d<=1?'#B86B00':'#6B6B6B';
+    const site = D.sites.find(s=>s.id===td.siteId);
+    return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 14px;border-bottom:1px solid #F5F5F2;${td.done?'opacity:0.45':''}">
+      <input type="checkbox" ${td.done?'checked':''} onchange="toggleTodo('${td.id}',this.checked)"
+        style="margin-top:3px;width:15px;height:15px;cursor:pointer;accent-color:#3D5CF5">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:${td.done?'400':'600'};color:${td.done?'#aaa':'#1A1A1A'};${td.done?'text-decoration:line-through':''}">
+          ${td.name}
+        </div>
+        <div style="font-size:10px;color:#6B6B6B;margin-top:2px;display:flex;gap:6px;flex-wrap:wrap">
+          <span style="background:${pr.bg};color:${pr.color};padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600">${pr.label}</span>
+          ${dLabel?`<span style="color:${dColor};font-weight:600">${dLabel}</span>`:''}
+          ${site?`<span style="color:#3D5CF5">${site.name}</span>`:''}
+          ${td.recur?`<span>🔁 ${td.recur==='daily'?'Hàng ngày':td.recur==='weekly'?'Hàng tuần':'Hàng tháng'}</span>`:''}
+          ${td.note?`<span style="color:#888">${td.note}</span>`:''}
+        </div>
+      </div>
+      <button onclick="openEditTodo('${td.id}')" style="font-size:10px;padding:2px 6px;background:#F5F5F2;color:#3D5CF5;border:1px solid #ddd;border-radius:4px;cursor:pointer;flex-shrink:0">✏️</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleTodo(id, checked) {
+  const td = D.todos.find(x=>x.id===id); if(!td) return;
+  td.done = checked; td.doneAt = checked ? today() : '';
+  // Nếu lặp lại và tick xong → tạo kỳ tiếp
+  if (checked && td.recur && td.due) {
+    const next = new Date(td.due);
+    if (td.recur==='daily') next.setDate(next.getDate()+1);
+    else if (td.recur==='weekly') next.setDate(next.getDate()+7);
+    else next.setMonth(next.getMonth()+1);
+    const nextStr = next.toISOString().split('T')[0];
+    if (!D.todos.find(x=>x.name===td.name&&x.due===nextStr)) {
+      D.todos.push({...td, id:'TODO-'+String(D.todoCounter++).padStart(3,'0'),
+        done:false, doneAt:'', due:nextStr});
+    }
+  }
+  renderTodos(); renderAlerts(); saveAll();
+}
+
+function populateTodoSiteSelect(selId) {
+  const el=$(selId); if(!el) return;
+  el.innerHTML='<option value="">— Chung —</option>'+D.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function openAddTodo() {
+  D.editingTodoId = null;
+  $('modal-todo-title').textContent='Thêm nhắc việc';
+  $('todo-del-btn').style.display='none';
+  $('todo-name').value=''; $('todo-note').value=''; $('todo-due').value='';
+  $('todo-priority').value='med'; $('todo-recur').value='';
+  populateTodoSiteSelect('todo-site');
+  openModal('modal-todo');
+}
+
+function openEditTodo(id) {
+  const td=D.todos.find(x=>x.id===id); if(!td) return;
+  D.editingTodoId=id;
+  $('modal-todo-title').textContent='Sửa: '+td.name;
+  $('todo-del-btn').style.display='inline-block';
+  populateTodoSiteSelect('todo-site');
+  $('todo-name').value=td.name||''; $('todo-priority').value=td.priority||'med';
+  $('todo-due').value=td.due||''; $('todo-recur').value=td.recur||'';
+  $('todo-site').value=td.siteId||''; $('todo-note').value=td.note||'';
+  openModal('modal-todo');
+}
+
+function saveTodo() {
+  const name=$('todo-name').value.trim();
+  if(!name){toast('Nhập nội dung việc cần làm',true);return;}
+  const entry={
+    id:D.editingTodoId||('TODO-'+String(D.todoCounter++).padStart(3,'0')),
+    name, priority:$('todo-priority').value, due:$('todo-due').value,
+    recur:$('todo-recur').value, siteId:$('todo-site').value,
+    note:$('todo-note').value, done:false, doneAt:'', updatedAt:today(),
+  };
+  if(D.editingTodoId){const i=D.todos.findIndex(x=>x.id===D.editingTodoId);if(i>=0)D.todos[i]=entry;}
+  else D.todos.push(entry);
+  closeModal('modal-todo'); renderTodos(); renderAlerts(); saveAll();
+  toast((D.editingTodoId?'Đã cập nhật':'Đã thêm')+': '+name);
+}
+
+function deleteTodoFromModal() {
+  if(!D.editingTodoId) return;
+  const td=D.todos.find(x=>x.id===D.editingTodoId);
+  if(!td||!confirm(`Xóa "${td.name}"?`)) return;
+  D.todos=D.todos.filter(x=>x.id!==D.editingTodoId);
+  closeModal('modal-todo'); renderTodos(); saveAll(); toast('Đã xóa: '+td.name);
+}
+
 // ═══════════════════════════════════════════════════════════════
 // M&A TRACKER
 // ═══════════════════════════════════════════════════════════════
