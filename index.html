@@ -27,6 +27,15 @@ body{font-family:system-ui,sans-serif;background:var(--surface);color:var(--text
 .btn-sm{padding:4px 10px;font-size:11px}
 .btn-export{background:linear-gradient(135deg,#C0392B,#E07B2A);color:#fff}
 .btn-intl{background:linear-gradient(135deg,#1A2F5A,#3D5CF5);color:#fff}
+.intl-sub-tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 14px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;margin-bottom:-1px}
+.intl-sub-tab.active{color:#1A2F5A;border-bottom-color:#1A2F5A}
+.intl-sub-tab:hover{color:var(--text-primary)}
+.help-tab{background:none;border:none;border-bottom:2px solid transparent;padding:8px 14px;font-size:12px;font-weight:500;color:var(--text-secondary);cursor:pointer;margin-bottom:-1px}
+.help-tab.on{color:#1A2F5A;border-bottom-color:#1A2F5A}
+.help-tab:hover{color:var(--text-primary)}
+.rubix-axis{margin-bottom:10px}
+.rubix-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;background:var(--white);border:0.5px solid var(--border);margin-bottom:4px}
+.rubix-item.done{background:#E0F8EE;border-color:#0D6E4A}
 
 .tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 16px;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
@@ -137,7 +146,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff
 <div id="panel-overview" class="panel active">
   <div class="g4" style="margin-bottom:12px" id="kpi-row"></div>
   <div class="g2">
-    <div class="card"><div class="card-title">Health Score — 8 Trục BE</div><div id="health-chart"></div></div>
+    <div class="card">
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Health Score — 8 Trục BE</span>
+        <button onclick="openModal('modal-8x5')" style="background:none;border:0.5px solid var(--border);border-radius:20px;padding:2px 10px;font-size:10px;color:var(--text-secondary);cursor:pointer">? 8×5</button>
+      </div>
+      <div id="health-chart"></div>
+    </div>
     <div class="card"><div class="card-title" id="alert-title">Cảnh báo hệ thống</div><div id="alerts-box"></div></div>
   </div>
   <!-- Lịch thanh toán + Nhắc việc -->
@@ -325,6 +340,59 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff
       <div id="intl-tips"></div>
     </div>
   </div>
+
+  <!-- SUB-TABS: Rubix / RFI / Biên bản -->
+  <div style="display:flex;gap:6px;margin-top:18px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:0">
+    <button class="intl-sub-tab active" onclick="switchIntlSub('rubix',this)">⭐ Checklist Rubix 4★</button>
+    <button class="intl-sub-tab" onclick="switchIntlSub('rfi',this)">❓ RFI Kỹ thuật</button>
+    <button class="intl-sub-tab" onclick="switchIntlSub('minutes',this)">📝 Biên bản họp</button>
+  </div>
+
+  <!-- RUBIX CHECKLIST -->
+  <div id="intl-sub-rubix" class="intl-sub active">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--text-secondary)">Checklist nghiệm thu theo 8 trục BE · Gắn với từng site</div>
+      <div style="display:flex;gap:6px">
+        <select id="rubix-site-sel" onchange="renderRubix()" style="font-size:11px;padding:3px 6px"></select>
+        <button class="btn btn-primary btn-sm" onclick="openAddRubixItem()">+ Hạng mục</button>
+      </div>
+    </div>
+    <div id="rubix-progress-bar" style="margin-bottom:12px"></div>
+    <div id="rubix-list"></div>
+  </div>
+
+  <!-- RFI -->
+  <div id="intl-sub-rfi" class="intl-sub" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="display:flex;gap:5px">
+        <span class="filter-chip active" style="font-size:10px" onclick="setRfiFilter('all',this)">Tất cả</span>
+        <span class="filter-chip" style="font-size:10px" onclick="setRfiFilter('open',this)">🔴 Chờ trả lời</span>
+        <span class="filter-chip" style="font-size:10px" onclick="setRfiFilter('answered',this)">✅ Đã trả lời</span>
+        <span class="filter-chip" style="font-size:10px" onclick="setRfiFilter('overdue',this)">⚠️ Quá hạn</span>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openAddRfi()">+ RFI mới</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl" id="rfi-table-el">
+        <thead><tr>
+          <th>Số RFI</th><th>Site</th><th>Câu hỏi</th><th>Người hỏi</th>
+          <th>Deadline</th><th>Trạng thái</th><th>Trả lời</th><th></th>
+        </tr></thead>
+        <tbody id="rfi-table"></tbody>
+      </table>
+      <div class="empty" id="rfi-empty">Chưa có RFI nào.</div>
+    </div>
+  </div>
+
+  <!-- MEETING MINUTES -->
+  <div id="intl-sub-minutes" class="intl-sub" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--text-secondary)">Biên bản họp song ngữ VI + ZH</div>
+      <button class="btn btn-primary btn-sm" onclick="openAddMinutes()">+ Biên bản mới</button>
+    </div>
+    <div id="minutes-list"></div>
+  </div>
+
 </div>
 
 <!-- FINANCE -->
@@ -356,9 +424,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff
 
 <!-- OKR -->
 <div id="panel-okr" class="panel">
-  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
     <button class="btn btn-primary btn-sm" onclick="openAddOKR()">+ KR</button>
     <button class="btn btn-sm" style="background:var(--gray-l);color:var(--text)" onclick="resetOKR()">↩ Reset</button>
+    <button onclick="openModal('modal-8x5')" style="margin-left:auto;background:none;border:0.5px solid var(--border);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--text-secondary);cursor:pointer">? Giải thích BE / FE / Tầng</button>
   </div>
   <div id="okr-list"></div>
 </div>
@@ -415,6 +484,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff
           <option value="weekly">📅 Tuần (gửi CĐT / T2.5)</option>
           <option value="monthly">📆 Tháng (tổng hợp)</option>
           <option value="intl">🌏 Team QT (tiếng Anh)</option>
+          <option value="zh">🇨🇳 Song ngữ VI+ZH (Team TQ)</option>
           <option value="p3">💎 P3 & Tài chính</option>
           <option value="okr">🎯 OKR</option>
         </select>
@@ -517,6 +587,211 @@ input:focus,select:focus,textarea:focus{border-color:var(--blue);background:#fff
       <button class="btn btn-sm" style="background:var(--gray-l);color:var(--text)" onclick="closeModal('modal-ma')">Hủy</button>
       <button class="btn btn-red btn-sm" id="ma-del-btn" style="display:none" onclick="deleteMaFromModal()">🗑 Xóa</button>
       <button class="btn btn-primary" onclick="saveMa()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Giải thích 8×5 -->
+<div class="overlay" id="modal-8x5">
+  <div class="modal" style="max-width:720px;max-height:88vh;overflow-y:auto">
+    <div class="modal-header" style="position:sticky;top:0;background:#fff;z-index:2;border-bottom:1px solid #F0F0F0">
+      <div>
+        <div style="font-size:14px;font-weight:700">Khung BIM × 8×5 × Tgq</div>
+        <div style="font-size:11px;color:#6B6B6B;margin-top:2px">8 Trục BE (Back End) × 5 Tầng FE (Front End)</div>
+      </div>
+      <button class="close-btn" onclick="closeModal('modal-8x5')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0">
+
+      <!-- Sub-tabs -->
+      <div style="display:flex;gap:0;border-bottom:1px solid #F0F0F0;background:#FAFAF8">
+        <button class="help-tab on" onclick="showHelpTab('be',this)">8 Trục BE</button>
+        <button class="help-tab" onclick="showHelpTab('fe',this)">5 Tầng FE</button>
+        <button class="help-tab" onclick="showHelpTab('matrix',this)">Ma trận 8×5</button>
+        <button class="help-tab" onclick="showHelpTab('level',this)">Level Change</button>
+      </div>
+
+      <!-- BE -->
+      <div id="help-be" class="help-pane" style="padding:16px">
+        <div style="font-size:12px;color:#6B6B6B;margin-bottom:12px"><b style="color:#1A1A1A">BE = Back End</b> — 8 trục nội dung quản trị. Trả lời: <i>ta đang quyết về cái gì?</i> Mọi quyết định BIM phải gắn ít nhất 1 trục.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="help-be-grid"></div>
+      </div>
+
+      <!-- FE -->
+      <div id="help-fe" class="help-pane" style="padding:16px;display:none">
+        <div style="font-size:12px;color:#6B6B6B;margin-bottom:12px"><b style="color:#1A1A1A">FE = Front End</b> — 5 tầng quyền lực. Trả lời: <i>ai có quyền ký?</i> Quy tắc cứng: <b style="color:#C0392B">không nhảy tầng.</b></div>
+        <div id="help-fe-list"></div>
+      </div>
+
+      <!-- Matrix -->
+      <div id="help-matrix" class="help-pane" style="padding:16px;display:none">
+        <div style="font-size:12px;color:#6B6B6B;margin-bottom:10px">Người chịu trách nhiệm cuối (A) theo từng giao điểm Trục × Tầng trong dự án của bạn.</div>
+        <div style="overflow-x:auto">
+          <table style="border-collapse:collapse;font-size:11px;width:100%" id="help-matrix-table"></table>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:6px">* Mỗi ô chỉ có 1 A. PMO là gatekeeper — không để quyết định nhảy tầng.</div>
+      </div>
+
+      <!-- Level -->
+      <div id="help-level" class="help-pane" style="padding:16px;display:none">
+        <div style="font-size:12px;color:#6B6B6B;margin-bottom:12px">Phân cấp Change Request — ngưỡng phê duyệt phải thống nhất từ đầu dự án.</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:12px 14px;border-radius:8px;background:#E0F8EE;border-left:3px solid #0D6E4A">
+            <div style="font-size:13px;font-weight:600;color:#0D6E4A">L1 — Nhỏ</div>
+            <div style="font-size:12px;color:#085041;margin-top:4px">Không ảnh hưởng tiến độ tổng. ΔCost ≤ ngưỡng X% đã thống nhất.</div>
+            <div style="font-size:11px;color:#0F6E56;margin-top:4px">Người A: <b>PMO</b> · Ví dụ: điều chỉnh vật liệu hoàn thiện nhỏ, thay đổi bố trí đồ nội thất</div>
+          </div>
+          <div style="padding:12px 14px;border-radius:8px;background:#FFF3DC;border-left:3px solid #B86B00">
+            <div style="font-size:13px;font-weight:600;color:#B86B00">L2 — Trung bình</div>
+            <div style="font-size:12px;color:#854F0B;margin-top:4px">Ảnh hưởng tiến độ hoặc ΔCost vượt ngưỡng. Cần phân tích tác động.</div>
+            <div style="font-size:11px;color:#854F0B;margin-top:4px">Người A: <b>Chủ đầu tư (CĐT)</b> · Ví dụ: thay đổi MEP lớn, phát sinh chi phí đáng kể</div>
+          </div>
+          <div style="padding:12px 14px;border-radius:8px;background:#FCEBEB;border-left:3px solid #C0392B">
+            <div style="font-size:13px;font-weight:600;color:#C0392B">L3 — Lớn / Chiến lược</div>
+            <div style="font-size:12px;color:#791F1F;margin-top:4px">Thay đổi tầm nhìn, concept, ảnh hưởng toàn bộ dự án hoặc chiến lược M&A.</div>
+            <div style="font-size:11px;color:#791F1F;margin-top:4px">Người A: <b>Steering Committee / CĐT cấp cao nhất</b> · Ví dụ: thay đổi công năng tổng thể, quyết định M&A</div>
+          </div>
+          <div style="padding:12px 14px;border-radius:8px;background:#EEF2FF;margin-top:4px">
+            <div style="font-size:12px;font-weight:600;color:#1A2F5A">Quy tắc RACI cho Change</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:11px">
+              <div><b>A</b> — Accountable: người ký/khóa (1 người duy nhất)</div>
+              <div><b>R</b> — Responsible: người trực tiếp làm</div>
+              <div><b>C</b> — Consulted: người phải hỏi ý trước</div>
+              <div><b>I</b> — Informed: người cần được biết sau</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer" style="border-top:1px solid #F0F0F0">
+      <div style="font-size:10px;color:#aaa;flex:1">Nguồn: BIM × 8×5 × Tgq Framework · Tài liệu nội bộ CĐT</div>
+      <button class="btn btn-primary" onclick="closeModal('modal-8x5')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- RFI -->
+<div class="overlay" id="modal-rfi">
+  <div class="modal" style="max-width:580px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-rfi-title">RFI mới</div>
+      <button class="close-btn" onclick="closeModal('modal-rfi')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Câu hỏi / Nội dung cần làm rõ *</label><textarea id="rfi-question" rows="3" placeholder="VD: Bản vẽ tầng 3 chưa có kích thước cột C12, đề nghị cung cấp..."></textarea></div>
+        <div class="field"><label class="lbl">Site</label><select id="rfi-site"></select></div>
+        <div class="field"><label class="lbl">Người hỏi</label><input type="text" id="rfi-asker" placeholder="Nguyễn Văn A / 王工"></div>
+        <div class="field"><label class="lbl">Gửi đến (người trả lời)</label><input type="text" id="rfi-to" placeholder="PMO / Thiết kế / CĐT"></div>
+        <div class="field"><label class="lbl">Deadline trả lời</label><input type="date" id="rfi-deadline"></div>
+        <div class="field"><label class="lbl">Mức độ ưu tiên</label>
+          <select id="rfi-priority">
+            <option value="urgent">🔴 Khẩn — ảnh hưởng thi công</option>
+            <option value="normal" selected>🟡 Bình thường</option>
+            <option value="low">🟢 Thấp — khi có thời gian</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Trục 8×5 liên quan</label>
+          <select id="rfi-truc">
+            <option value="">— Chọn —</option>
+            <option>BE1</option><option>BE2</option><option>BE3</option><option>BE4</option>
+            <option>BE5</option><option>BE6</option><option>BE7</option><option>BE8</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Trả lời (điền sau khi có)</label><textarea id="rfi-answer" rows="2" placeholder="Trả lời..."></textarea></div>
+        <div class="field"><label class="lbl">Trạng thái</label>
+          <select id="rfi-status">
+            <option value="open">⏳ Chờ trả lời</option>
+            <option value="answered">✅ Đã trả lời</option>
+            <option value="closed">🔒 Đóng</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Link tài liệu (Drive/bản vẽ)</label><input type="text" id="rfi-link" placeholder="https://..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-rfi')">Hủy</button>
+      <button class="btn btn-red btn-sm" id="rfi-del-btn" style="display:none" onclick="deleteRfiFromModal()">🗑 Xóa</button>
+      <button class="btn btn-primary" onclick="saveRfi()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Rubix Checklist Item -->
+<div class="overlay" id="modal-rubix">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-rubix-title">Thêm hạng mục Rubix</div>
+      <button class="close-btn" onclick="closeModal('modal-rubix')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Hạng mục nghiệm thu *</label><input type="text" id="rubix-item-name" placeholder="VD: Hệ thống PCCC đã nghiệm thu..."></div>
+        <div class="field"><label class="lbl">Trục BE</label>
+          <select id="rubix-item-axis">
+            <option>BE1 — Tầm nhìn</option><option>BE2 — Chiến lược</option>
+            <option>BE3 — Kế hoạch</option><option>BE4 — Lực lượng</option>
+            <option>BE5 — Tài chính</option><option selected>BE6 — SOP</option>
+            <option>BE7 — Hồ sơ</option><option>BE8 — Cải tiến</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Tiêu chuẩn Rubix yêu cầu</label>
+          <select id="rubix-item-star">
+            <option value="3">⭐⭐⭐ 3 sao</option>
+            <option value="4" selected>⭐⭐⭐⭐ 4 sao</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Site</label><select id="rubix-item-site"></select></div>
+        <div class="field"><label class="lbl">Trạng thái</label>
+          <select id="rubix-item-status">
+            <option value="pending">⏳ Chưa thực hiện</option>
+            <option value="in-progress">🔄 Đang thực hiện</option>
+            <option value="done">✅ Hoàn thành</option>
+            <option value="failed">❌ Không đạt</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Người A (chịu trách nhiệm)</label><input type="text" id="rubix-item-owner" placeholder="PMO / Team TQ"></div>
+        <div class="field"><label class="lbl">Deadline</label><input type="date" id="rubix-item-deadline"></div>
+        <div class="field"><label class="lbl">Link ảnh chứng minh (Drive)</label><input type="text" id="rubix-item-link" placeholder="https://..."></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Ghi chú / nhận xét Rubix</label><textarea id="rubix-item-note" rows="2" placeholder="Rubix yêu cầu bổ sung..."></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-rubix')">Hủy</button>
+      <button class="btn btn-red btn-sm" id="rubix-del-btn" style="display:none" onclick="deleteRubixFromModal()">🗑 Xóa</button>
+      <button class="btn btn-primary" onclick="saveRubixItem()">💾 Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Biên bản họp -->
+<div class="overlay" id="modal-minutes">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-minutes-title">Biên bản họp mới</div>
+      <button class="close-btn" onclick="closeModal('modal-minutes')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Tên cuộc họp *</label><input type="text" id="min-title" placeholder="VD: Weekly sync T23 · 会议 T23"></div>
+        <div class="field"><label class="lbl">Ngày họp</label><input type="date" id="min-date"></div>
+        <div class="field"><label class="lbl">Site</label><select id="min-site"></select></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Tham dự (VI)</label><input type="text" id="min-attendees-vi" placeholder="PMO, QL VH, Team TQ..."></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">参会人员 (ZH)</label><input type="text" id="min-attendees-zh" placeholder="项目经理、运营主管、中国团队..."></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Nội dung & Quyết định (VI)</label><textarea id="min-content-vi" rows="4" placeholder="1. Tiến độ T23 đạt 45%&#10;2. Quyết định: đẩy nhanh SOP BE6..."></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">会议内容与决议 (ZH)</label><textarea id="min-content-zh" rows="4" placeholder="1. T23进度达到45%&#10;2. 决定：加快BE6 SOP进度..."></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Action items (VI — ai làm gì trước khi nào)</label><textarea id="min-actions-vi" rows="3" placeholder="[PMO] Gửi báo cáo tài chính → trước 20/08&#10;[Team TQ] Hoàn thiện SOP BE6 → trước 25/08"></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">行动计划 (ZH)</label><textarea id="min-actions-zh" rows="3" placeholder="[项目经理] 发送财务报告 → 20/08前&#10;[中国团队] 完成BE6 SOP → 25/08前"></textarea></div>
+        <div class="field"><label class="lbl">Người chủ trì</label><input type="text" id="min-chair" placeholder="PMO"></div>
+        <div class="field"><label class="lbl">Họp tiếp theo</label><input type="date" id="min-next"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-minutes')">Hủy</button>
+      <button class="btn btn-red btn-sm" id="min-del-btn" style="display:none" onclick="deleteMinutesFromModal()">🗑 Xóa</button>
+      <button class="btn btn-sm btn-teal" onclick="exportMinutesPDF()">🖨️ Xuất PDF</button>
+      <button class="btn btn-primary" onclick="saveMinutes()">💾 Lưu</button>
     </div>
   </div>
 </div>

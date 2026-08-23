@@ -199,6 +199,9 @@ let D = {
     {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.3: Ra mắt gói dịch vụ trọn gói (hành chính + kế toán + pháp lý)',truc:'FE2',owner:'PMO',target:1,unit:'gói DV',actual:0},
     {obj:'O4 — M&A & Dịch vụ hỗ trợ khởi nghiệp (Q4/2025)',kr:'KR4.4: ≥2 khách hàng thử nghiệm gói dịch vụ trọn gói',truc:'FE3',owner:'PMO + Sales',target:2,unit:'KH',actual:0},
   ],
+  rfis: [], rfiCounter: 1, rfiFilter: 'all', editingRfiId: null,
+  rubixItems: [], rubixCounter: 1, editingRubixId: null,
+  minutes: [], minutesCounter: 1, editingMinutesId: null,
   payments: [], payCounter: 1, payFilter: 'all',
   todos: [], todoCounter: 1, todoFilter: 'all',
   editingPayId: null, editingTodoId: null,
@@ -215,7 +218,7 @@ let D = {
 // ═══════════════════════════════════════════════════════════════
 
 // ⚙️ CẤU HÌNH: Paste URL Google Apps Script Web App vào đây
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 
 // Offline fallback: vẫn dùng localStorage khi mất mạng
 const LS_KEY = 'ops_v5_cache';
@@ -280,6 +283,9 @@ async function loadFromSheets() {
         Object.keys(data.health).forEach(k => { D.health[k] = +data.health[k] || 3; });
       }
       if (data.meta && data.meta.changeCounter) D.changeCounter = +data.meta.changeCounter || 1;
+      if (data.rfis     && data.rfis.length)     D.rfis     = data.rfis;
+      if (data.rubix    && data.rubix.length)    D.rubixItems = data.rubix;
+      if (data.minutes  && data.minutes.length)  D.minutes  = data.minutes;
       if (data.payments && data.payments.length) D.payments = data.payments;
       if (data.todos && data.todos.length) D.todos = data.todos;
       if (data.ma && data.ma.length) D.ma = data.ma;
@@ -387,7 +393,7 @@ function sw(id, btn) {
   if(id==='finance') populateFinSelect();
   if(id==='change') populateChangeSel();
   if(id==='report') { populateRptSel(); renderReportPreview(); }
-  if(id==='intl') { renderClocks(); renderMembers(); renderMeetings(); renderIntlChecklist(); }
+  if(id==='intl') { renderClocks(); renderMembers(); renderMeetings(); renderIntlChecklist(); renderRubix(); renderRfi(); renderMinutesList(); populateIntlSubSelects(); }
   if(id==='ma') renderMa();
 }
 
@@ -911,7 +917,14 @@ ${note?`<h3>GHI CHÚ</h3><p>${note}</p>`:''}
 }
 
 function renderReportPreview() {
-  const html = buildReport($('rpt-type').value,$('rpt-site').value,$('rpt-period').value,$('rpt-sender').value,$('rpt-note').value);
+  const type=$('rpt-type').value, site=$('rpt-site').value;
+  const period=$('rpt-period').value, sender=$('rpt-sender').value, note=$('rpt-note').value;
+  if(type==='zh') {
+    const txt = buildZhReport(period, site, sender);
+    $('rpt-preview').innerHTML=`<pre style="font-size:11px;line-height:1.7;white-space:pre-wrap;font-family:inherit">${txt}</pre>`;
+    return;
+  }
+  const html = buildReport(type,site,period,sender,note);
   $('rpt-preview').innerHTML = `<div style="font-size:11px;line-height:1.6">${html.replace(/<h[23]/g,'<div style="margin:10px 0 5px;font-weight:700;color:#1A2F5A">').replace(/<\/h[23]>/g,'</div>').replace(/<table>/g,'<table style="width:100%;border-collapse:collapse;margin-bottom:8px">').replace(/<th>/g,'<th style="background:#1A2F5A;color:#fff;padding:4px 6px;text-align:left;font-size:10px">').replace(/<td>/g,'<td style="padding:4px 6px;border-bottom:1px solid #F5F5F2;font-size:10px">').replace(/<td style="color/g,'<td style="font-size:10px;color')}</div>`;
 }
 
@@ -1477,6 +1490,530 @@ function advanceMaStage(id) {
   const _stages = getMAStages();
   const idx = _stages.findIndex(s=>s.id===c.status);
   if(idx<_stages.length-1) { c.status=_stages[idx+1].id; c.updatedAt=today(); renderMa(); saveAll(); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTL SUB-TABS
+// ═══════════════════════════════════════════════════════════════
+function switchIntlSub(tab, btn) {
+  document.querySelectorAll('.intl-sub-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.intl-sub').forEach(el=>el.style.display='none');
+  btn.classList.add('active');
+  const el = document.getElementById('intl-sub-'+tab);
+  if(el) el.style.display='block';
+  if(tab==='rubix') renderRubix();
+  if(tab==='rfi') renderRfi();
+  if(tab==='minutes') renderMinutesList();
+}
+
+function populateIntlSubSelects() {
+  ['rfi-site','rubix-item-site','min-site','rubix-site-sel'].forEach(id => {
+    const el = $(id); if(!el) return;
+    const all = id==='rubix-site-sel'?'':null;
+    el.innerHTML = (all!==null?`<option value="">— Tất cả —</option>`:'')+
+      D.sites.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RUBIX 4★ CHECKLIST
+// ═══════════════════════════════════════════════════════════════
+const RUBIX_AXES = ['BE1','BE2','BE3','BE4','BE5','BE6','BE7','BE8'];
+const RUBIX_STATUS_CFG = {
+  'pending':     {label:'⏳ Chưa thực hiện', color:'#6B6B6B', bg:'#F5F5F2'},
+  'in-progress': {label:'🔄 Đang thực hiện', color:'#3D5CF5', bg:'#EEF2FF'},
+  'done':        {label:'✅ Hoàn thành',      color:'#0D6E4A', bg:'#E0F8EE'},
+  'failed':      {label:'❌ Không đạt',       color:'#C0392B', bg:'#FCEBEB'},
+};
+
+function renderRubix() {
+  populateIntlSubSelects();
+  const siteId = $('rubix-site-sel')?.value || '';
+  const items  = siteId ? D.rubixItems.filter(r=>r.siteId===siteId) : D.rubixItems;
+  const done   = items.filter(r=>r.status==='done').length;
+  const pct    = items.length ? Math.round(done/items.length*100) : 0;
+  const pColor = pct>=70?'#0D6E4A':pct>=40?'#B86B00':'#C0392B';
+
+  // Progress bar
+  $('rubix-progress-bar').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <div style="flex:1;background:#F0F0F0;border-radius:6px;height:10px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${pColor};border-radius:6px;transition:width .3s"></div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:${pColor};min-width:40px">${pct}%</div>
+      <div style="font-size:11px;color:#6B6B6B">${done}/${items.length} hạng mục · ${pct>=70?'✅ Đủ điều kiện 4★':'⚠️ Chưa đạt 4★'}</div>
+    </div>`;
+
+  if(!items.length) { $('rubix-list').innerHTML=`<div class="empty">Chưa có hạng mục. Nhấn + Hạng mục để thêm.</div>`; return; }
+
+  // Group by axis
+  let html = '';
+  RUBIX_AXES.forEach(axis => {
+    const axisItems = items.filter(r=>r.axis===axis||r.axis?.startsWith(axis));
+    if(!axisItems.length) return;
+    const axDone = axisItems.filter(r=>r.status==='done').length;
+    html += `<div class="rubix-axis">
+      <div style="font-size:11px;font-weight:600;color:#1A2F5A;margin-bottom:5px;display:flex;justify-content:space-between">
+        <span>${axis}</span><span style="color:${axDone===axisItems.length?'#0D6E4A':'#B86B00'}">${axDone}/${axisItems.length}</span>
+      </div>`;
+    axisItems.forEach(r => {
+      const st = RUBIX_STATUS_CFG[r.status]||RUBIX_STATUS_CFG.pending;
+      const site = D.sites.find(s=>s.id===r.siteId);
+      html += `<div class="rubix-item ${r.status==='done'?'done':''}" onclick="openEditRubixItem('${r.id}')">
+        <input type="checkbox" ${r.status==='done'?'checked':''} onclick="event.stopPropagation();toggleRubix('${r.id}',this.checked)" style="accent-color:#0D6E4A">
+        <div style="flex:1;font-size:12px;color:${r.status==='done'?'#0D6E4A':'#1A1A1A'};${r.status==='done'?'text-decoration:line-through':''}">
+          ${r.name}
+          ${site&&!siteId?`<span style="font-size:10px;color:#3D5CF5;margin-left:4px">${site.name}</span>`:''}
+        </div>
+        <span style="background:${st.bg};color:${st.color};font-size:9px;font-weight:600;padding:1px 7px;border-radius:10px">${st.label}</span>
+        ${r.owner?`<span style="font-size:10px;color:#6B6B6B">${r.owner}</span>`:''}
+        ${r.link?`<a href="${r.link}" target="_blank" onclick="event.stopPropagation()" style="font-size:10px;color:#3D5CF5">📎</a>`:''}
+      </div>`;
+    });
+    html += '</div>';
+  });
+  $('rubix-list').innerHTML = html || `<div class="empty">Chưa có hạng mục.</div>`;
+}
+
+function toggleRubix(id, checked) {
+  const r = D.rubixItems.find(x=>x.id===id); if(!r) return;
+  r.status = checked ? 'done' : 'pending'; r.updatedAt = today();
+  renderRubix(); saveAll();
+}
+
+function openAddRubixItem() {
+  D.editingRubixId = null;
+  $('modal-rubix-title').textContent = 'Thêm hạng mục Rubix';
+  $('rubix-del-btn').style.display = 'none';
+  $('rubix-item-name').value=''; $('rubix-item-owner').value='';
+  $('rubix-item-link').value=''; $('rubix-item-note').value=''; $('rubix-item-deadline').value='';
+  $('rubix-item-axis').value='BE6 — SOP'; $('rubix-item-star').value='4'; $('rubix-item-status').value='pending';
+  populateIntlSubSelects();
+  $('rubix-item-site').value = $('rubix-site-sel')?.value || '';
+  openModal('modal-rubix');
+}
+
+function openEditRubixItem(id) {
+  const r = D.rubixItems.find(x=>x.id===id); if(!r) return;
+  D.editingRubixId = id;
+  $('modal-rubix-title').textContent = 'Sửa: '+r.name;
+  $('rubix-del-btn').style.display = 'inline-block';
+  populateIntlSubSelects();
+  $('rubix-item-name').value=r.name||''; $('rubix-item-axis').value=r.axis||'BE6 — SOP';
+  $('rubix-item-star').value=r.star||'4'; $('rubix-item-status').value=r.status||'pending';
+  $('rubix-item-site').value=r.siteId||''; $('rubix-item-owner').value=r.owner||'';
+  $('rubix-item-deadline').value=r.deadline||''; $('rubix-item-link').value=r.link||'';
+  $('rubix-item-note').value=r.note||'';
+  openModal('modal-rubix');
+}
+
+function saveRubixItem() {
+  const name = $('rubix-item-name').value.trim();
+  if(!name){toast('Nhập tên hạng mục',true);return;}
+  const entry = {
+    id: D.editingRubixId||('RBX-'+String(D.rubixCounter++).padStart(3,'0')),
+    name, axis:$('rubix-item-axis').value, star:$('rubix-item-star').value,
+    status:$('rubix-item-status').value, siteId:$('rubix-item-site').value,
+    owner:$('rubix-item-owner').value, deadline:$('rubix-item-deadline').value,
+    link:$('rubix-item-link').value, note:$('rubix-item-note').value, updatedAt:today(),
+  };
+  if(D.editingRubixId){const i=D.rubixItems.findIndex(x=>x.id===D.editingRubixId);if(i>=0)D.rubixItems[i]=entry;}
+  else D.rubixItems.push(entry);
+  closeModal('modal-rubix'); renderRubix(); saveAll();
+  toast((D.editingRubixId?'Đã cập nhật':'Đã thêm')+': '+name);
+}
+
+function deleteRubixFromModal() {
+  const r = D.rubixItems.find(x=>x.id===D.editingRubixId);
+  if(!r||!confirm(`Xóa "${r.name}"?`)) return;
+  D.rubixItems = D.rubixItems.filter(x=>x.id!==D.editingRubixId);
+  closeModal('modal-rubix'); renderRubix(); saveAll(); toast('Đã xóa: '+r.name);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RFI — YÊU CẦU LÀM RÕ KỸ THUẬT
+// ═══════════════════════════════════════════════════════════════
+function setRfiFilter(f, btn) {
+  D.rfiFilter = f;
+  btn.parentElement.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderRfi();
+}
+
+function renderRfi() {
+  const now = today();
+  let list = [...D.rfis].sort((a,b)=>{
+    const pa={urgent:0,normal:1,low:2}[a.priority]??1;
+    const pb={urgent:0,normal:1,low:2}[b.priority]??1;
+    return pa-pb;
+  });
+  if(D.rfiFilter==='open')     list=list.filter(r=>r.status==='open');
+  else if(D.rfiFilter==='answered') list=list.filter(r=>r.status==='answered');
+  else if(D.rfiFilter==='overdue')  list=list.filter(r=>r.status==='open'&&r.deadline&&r.deadline<now);
+
+  if(!list.length){$('rfi-table').innerHTML='';$('rfi-empty').style.display='block';return;}
+  $('rfi-empty').style.display='none';
+  const prCfg={urgent:{l:'🔴 Khẩn',c:'#C0392B',bg:'#FCEBEB'},normal:{l:'🟡 BT',c:'#B86B00',bg:'#FFF3DC'},low:{l:'🟢 Thấp',c:'#0D6E4A',bg:'#E0F8EE'}};
+  const stCfg={open:{l:'⏳ Chờ',c:'#B86B00',bg:'#FFF3DC'},answered:{l:'✅ Đã TL',c:'#0D6E4A',bg:'#E0F8EE'},closed:{l:'🔒 Đóng',c:'#6B6B6B',bg:'#F5F5F2'}};
+  $('rfi-table').innerHTML = list.map(r=>{
+    const pr=prCfg[r.priority]||prCfg.normal;
+    const st=stCfg[r.status]||stCfg.open;
+    const site=D.sites.find(s=>s.id===r.siteId);
+    const overdue=r.status==='open'&&r.deadline&&r.deadline<now;
+    return `<tr>
+      <td style="font-weight:700;color:#3D5CF5;font-size:11px">${r.id}</td>
+      <td style="font-size:11px">${site?.name||'—'}</td>
+      <td style="font-size:11px;max-width:200px">${r.question||''}</td>
+      <td style="font-size:11px">${r.asker||'—'}</td>
+      <td style="font-size:11px;color:${overdue?'#C0392B':'inherit'};font-weight:${overdue?700:400}">${r.deadline||'—'}${overdue?' ⚠️':''}</td>
+      <td><span style="background:${st.bg};color:${st.color};padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600">${st.l}</span></td>
+      <td style="font-size:11px;max-width:160px;color:#0D6E4A">${r.answer||'—'}</td>
+      <td><button class="btn btn-sm btn-amber" style="padding:2px 7px" onclick="openEditRfi('${r.id}')">✏️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddRfi() {
+  D.editingRfiId=null;
+  $('modal-rfi-title').textContent='RFI mới';
+  $('rfi-del-btn').style.display='none';
+  ['rfi-question','rfi-asker','rfi-to','rfi-answer','rfi-link'].forEach(id=>$(id).value='');
+  $('rfi-deadline').value=''; $('rfi-priority').value='normal'; $('rfi-status').value='open'; $('rfi-truc').value='';
+  populateIntlSubSelects();
+  openModal('modal-rfi');
+}
+
+function openEditRfi(id) {
+  const r=D.rfis.find(x=>x.id===id); if(!r) return;
+  D.editingRfiId=id;
+  $('modal-rfi-title').textContent='RFI: '+r.id;
+  $('rfi-del-btn').style.display='inline-block';
+  populateIntlSubSelects();
+  $('rfi-question').value=r.question||''; $('rfi-asker').value=r.asker||'';
+  $('rfi-to').value=r.to||''; $('rfi-deadline').value=r.deadline||'';
+  $('rfi-priority').value=r.priority||'normal'; $('rfi-truc').value=r.truc||'';
+  $('rfi-answer').value=r.answer||''; $('rfi-status').value=r.status||'open';
+  $('rfi-link').value=r.link||''; $('rfi-site').value=r.siteId||'';
+  openModal('modal-rfi');
+}
+
+function saveRfi() {
+  const q=$('rfi-question').value.trim();
+  if(!q){toast('Nhập nội dung câu hỏi',true);return;}
+  const entry={
+    id:D.editingRfiId||('RFI-'+String(D.rfiCounter++).padStart(3,'0')),
+    question:q, asker:$('rfi-asker').value, to:$('rfi-to').value,
+    deadline:$('rfi-deadline').value, priority:$('rfi-priority').value,
+    truc:$('rfi-truc').value, answer:$('rfi-answer').value,
+    status:$('rfi-status').value, siteId:$('rfi-site').value,
+    link:$('rfi-link').value, updatedAt:today(),
+  };
+  if(D.editingRfiId){const i=D.rfis.findIndex(x=>x.id===D.editingRfiId);if(i>=0)D.rfis[i]=entry;}
+  else D.rfis.push(entry);
+  closeModal('modal-rfi'); renderRfi(); saveAll();
+  toast((D.editingRfiId?'Đã cập nhật RFI':'Đã thêm RFI')+': '+entry.id);
+}
+
+function deleteRfiFromModal() {
+  const r=D.rfis.find(x=>x.id===D.editingRfiId);
+  if(!r||!confirm(`Xóa RFI "${r.id}"?`)) return;
+  D.rfis=D.rfis.filter(x=>x.id!==D.editingRfiId);
+  closeModal('modal-rfi'); renderRfi(); saveAll(); toast('Đã xóa: '+r.id);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BIÊN BẢN HỌP SONG NGỮ
+// ═══════════════════════════════════════════════════════════════
+function renderMinutesList() {
+  const list = [...D.minutes].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!list.length){
+    $('minutes-list').innerHTML=`<div class="empty">Chưa có biên bản nào. Nhấn + Biên bản mới để tạo.</div>`;
+    return;
+  }
+  $('minutes-list').innerHTML = list.map(m=>{
+    const site=D.sites.find(s=>s.id===m.siteId);
+    return `<div class="card" style="margin-bottom:8px;cursor:pointer" onclick="openEditMinutes('${m.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div style="font-size:13px;font-weight:600">${m.title}</div>
+          <div style="font-size:10px;color:#6B6B6B;margin-top:2px">
+            ${m.date||'—'} · ${site?.name||'Chung'} · Chủ trì: ${m.chair||'—'}
+            ${m.next?` · Họp tiếp: ${m.next}`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-sm btn-teal" style="padding:2px 8px;font-size:10px" onclick="event.stopPropagation();exportMinutesPDF('${m.id}')">🖨️</button>
+          <button class="btn btn-sm btn-amber" style="padding:2px 7px" onclick="event.stopPropagation();openEditMinutes('${m.id}')">✏️</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+        <div><div style="font-weight:600;color:#1A2F5A;margin-bottom:3px">🇻🇳 Nội dung</div><div style="color:#444;white-space:pre-line;max-height:60px;overflow:hidden">${(m.contentVi||'—').slice(0,150)}</div></div>
+        <div><div style="font-weight:600;color:#C0392B;margin-bottom:3px">🇨🇳 会议内容</div><div style="color:#444;white-space:pre-line;max-height:60px;overflow:hidden">${(m.contentZh||'—').slice(0,150)}</div></div>
+      </div>
+      ${m.actionsVi?`<div style="font-size:10px;color:#B86B00;margin-top:6px;border-top:1px solid #F5F5F2;padding-top:5px">📋 ${m.actionsVi.slice(0,100)}...</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function openAddMinutes() {
+  D.editingMinutesId=null;
+  $('modal-minutes-title').textContent='Biên bản họp mới';
+  $('min-del-btn').style.display='none';
+  ['min-title','min-attendees-vi','min-attendees-zh','min-content-vi','min-content-zh',
+   'min-actions-vi','min-actions-zh','min-chair','min-next'].forEach(id=>$(id).value='');
+  $('min-date').value=today();
+  populateIntlSubSelects();
+  openModal('modal-minutes');
+}
+
+function openEditMinutes(id) {
+  const m=D.minutes.find(x=>x.id===id); if(!m) return;
+  D.editingMinutesId=id;
+  $('modal-minutes-title').textContent='Sửa: '+m.title;
+  $('min-del-btn').style.display='inline-block';
+  populateIntlSubSelects();
+  $('min-title').value=m.title||''; $('min-date').value=m.date||'';
+  $('min-site').value=m.siteId||''; $('min-attendees-vi').value=m.attendeesVi||'';
+  $('min-attendees-zh').value=m.attendeesZh||''; $('min-content-vi').value=m.contentVi||'';
+  $('min-content-zh').value=m.contentZh||''; $('min-actions-vi').value=m.actionsVi||'';
+  $('min-actions-zh').value=m.actionsZh||''; $('min-chair').value=m.chair||'';
+  $('min-next').value=m.next||'';
+  openModal('modal-minutes');
+}
+
+function saveMinutes() {
+  const title=$('min-title').value.trim();
+  if(!title){toast('Nhập tên cuộc họp',true);return;}
+  const entry={
+    id:D.editingMinutesId||('MIN-'+String(D.minutesCounter++).padStart(3,'0')),
+    title, date:$('min-date').value, siteId:$('min-site').value,
+    attendeesVi:$('min-attendees-vi').value, attendeesZh:$('min-attendees-zh').value,
+    contentVi:$('min-content-vi').value, contentZh:$('min-content-zh').value,
+    actionsVi:$('min-actions-vi').value, actionsZh:$('min-actions-zh').value,
+    chair:$('min-chair').value, next:$('min-next').value, updatedAt:today(),
+  };
+  if(D.editingMinutesId){const i=D.minutes.findIndex(x=>x.id===D.editingMinutesId);if(i>=0)D.minutes[i]=entry;}
+  else D.minutes.push(entry);
+  closeModal('modal-minutes'); renderMinutesList(); saveAll();
+  toast((D.editingMinutesId?'Đã cập nhật':'Đã tạo')+' biên bản: '+title);
+}
+
+function deleteMinutesFromModal() {
+  const m=D.minutes.find(x=>x.id===D.editingMinutesId);
+  if(!m||!confirm(`Xóa biên bản "${m.title}"?`)) return;
+  D.minutes=D.minutes.filter(x=>x.id!==D.editingMinutesId);
+  closeModal('modal-minutes'); renderMinutesList(); saveAll(); toast('Đã xóa biên bản');
+}
+
+function exportMinutesPDF(id) {
+  const mid = id || D.editingMinutesId;
+  const m = D.minutes.find(x=>x.id===mid); if(!m) return;
+  const site = D.sites.find(s=>s.id===m.siteId);
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>Biên bản ${m.title}</title>
+  <style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;font-size:13px;line-height:1.6}
+  h1{font-size:18px;color:#1A2F5A;border-bottom:2px solid #1A2F5A;padding-bottom:8px}
+  h2{font-size:14px;color:#3D5CF5;margin-top:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .col-vi{border-left:3px solid #3D5CF5;padding-left:12px}
+  .col-zh{border-left:3px solid #C0392B;padding-left:12px}
+  .meta{color:#666;font-size:12px;margin-bottom:16px}
+  pre{white-space:pre-wrap;font-family:Arial,sans-serif;font-size:12px}
+  @media print{body{margin:20px}}</style></head><body>
+  <h1>📝 BIÊN BẢN HỌP · 会议纪要</h1>
+  <div class="meta">
+    <b>${m.title}</b> · ${m.date||'—'} · ${site?.name||'Chung'} · Chủ trì: ${m.chair||'—'}
+    ${m.next?` · Họp tiếp: ${m.next}`:''}
+  </div>
+  <div class="grid">
+    <div class="col-vi"><h2>🇻🇳 Tham dự</h2><pre>${m.attendeesVi||'—'}</pre></div>
+    <div class="col-zh"><h2>🇨🇳 参会人员</h2><pre>${m.attendeesZh||'—'}</pre></div>
+    <div class="col-vi"><h2>Nội dung & Quyết định</h2><pre>${m.contentVi||'—'}</pre></div>
+    <div class="col-zh"><h2>会议内容与决议</h2><pre>${m.contentZh||'—'}</pre></div>
+    <div class="col-vi"><h2>Action Items</h2><pre>${m.actionsVi||'—'}</pre></div>
+    <div class="col-zh"><h2>行动计划</h2><pre>${m.actionsZh||'—'}</pre></div>
+  </div>
+  <div style="margin-top:30px;border-top:1px solid #ddd;padding-top:12px;font-size:11px;color:#999">
+    Tạo bởi Ops Dashboard · BIM 8×5 · ${today()}
+  </div>
+  <script>window.print();</scr`+'ipt></body></html>');
+  w.document.close();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BÁO CÁO SONG NGỮ VI+ZH
+// ═══════════════════════════════════════════════════════════════
+function buildZhReport(period, site, sender) {
+  const sites   = site==='all' ? D.sites : D.sites.filter(s=>s.id===site);
+  const active  = sites.filter(s=>s.status==='active');
+  const changes = D.changes.filter(c=>site==='all'||D.sites.find(s=>s.id===c.siteId)?.id===site);
+  const pending = changes.filter(c=>c.status==='Pending').length;
+  const okrs    = D.okrs.map(o=>({...o,target:+o.target||0,actual:+o.actual||0}));
+  const okrAvg  = okrs.length ? Math.round(okrs.reduce((a,o)=>a+(o.target>0?Math.min(100,o.actual/o.target*100):0),0)/okrs.length) : 0;
+  const rfiOpen = D.rfis.filter(r=>r.status==='open').length;
+  const rubixPct= D.rubixItems.length ? Math.round(D.rubixItems.filter(r=>r.status==='done').length/D.rubixItems.length*100) : 0;
+
+  return `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🇻🇳 BÁO CÁO VẬN HÀNH TUẦN · BIM 8×5
+🇨🇳 每周运营报告 · BIM 8×5
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 ${period} | 👤 ${sender||'PMO'}
+
+🏢 TIẾN ĐỘ DỰ ÁN / 项目进度
+${active.map(s=>`  ${s.pct>=70?'🟢':s.pct>=40?'🟡':'🔴'} ${s.name}: ${s.pct}% | SOP ${s.sop}/${s.sopT} | 出租率 ${s.fill}%`).join('\n')||'  — Chưa có site nào —'}
+
+📊 TỔNG QUAN / 总体情况
+  ✅ OKR: ${okrAvg}% | 変更待审/Change pending: ${pending}
+  ⭐ Rubix 4★: ${rubixPct}% hoàn thành / 完成率
+  ❓ RFI chờ trả lời / 待回复RFI: ${rfiOpen} mục
+
+📝 CHANGE LOG (${changes.filter(c=>c.status==='Pending').length} pending)
+${changes.slice(0,5).map(c=>`  [${c.status}] ${c.id} — ${c.content||c.site}`).join('\n')||'  Chưa có change / 暂无变更'}
+
+${rfiOpen>0?`❓ RFI CẦN TRẢ LỜI / 待回复事项\n${D.rfis.filter(r=>r.status==='open').slice(0,3).map(r=>`  ${r.id}: ${r.question?.slice(0,60)||'—'}`).join('\n')}\n\n`:''}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Dashboard: ${typeof SHEET_URL!=='undefined'?'(xem link dashboard)':''}
+Phản hồi/反馈: ${sender||'PMO'}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GIẢI THÍCH 8×5
+// ═══════════════════════════════════════════════════════════════
+const HELP_BE = [
+  {id:'BE1',name:'Tầm nhìn',en:'Vision',bg:'#E6F1FB',tc:'#0C447C',
+   desc:'Quyết định ảnh hưởng công năng tổng thể, định vị tài sản, khả năng mở rộng dài hạn.',
+   ex:'Thay đổi layout tổng, zoning công năng, cao độ chiến lược'},
+  {id:'BE2',name:'Chiến lược',en:'Strategy',bg:'#EEEDFE',tc:'#3C3489',
+   desc:'Quyết định về công nghệ sử dụng, chuẩn kỹ thuật, hướng đầu tư CAPEX vs OPEX.',
+   ex:'Chọn công nghệ MEP, chuẩn vật liệu, hướng đầu tư M&A'},
+  {id:'BE3',name:'Kế hoạch',en:'Planning',bg:'#E1F5EE',tc:'#085041',
+   desc:'Tiến độ, nguồn lực, phân kỳ đầu tư. Điều phối đa bên theo mốc thời gian.',
+   ex:'Milestone thi công, phân kỳ dự án, lịch onboard site mới'},
+  {id:'BE4',name:'Lực lượng',en:'People',bg:'#FAEEDA',tc:'#633806',
+   desc:'Nhân sự, phân vai RACI, năng lực đội ngũ, cơ chế lương 3P.',
+   ex:'RACI thi công, onboard team TQ, cơ chế P1/P2/P3'},
+  {id:'BE5',name:'Tài chính',en:'Finance',bg:'#FCEBEB',tc:'#791F1F',
+   desc:'CAPEX, OPEX, dòng tiền, kiểm soát phát sinh ΔCost, ROI.',
+   ex:'Dự toán site, phát sinh hàng tuần, P3 pool'},
+  {id:'BE6',name:'Quy trình / SOP',en:'Process',bg:'#EAF3DE',tc:'#27500A',
+   desc:'Chuẩn hóa vận hành, SOP, nghiệm thu, chuẩn 4★ Rubix.',
+   ex:'SOP vệ sinh, SOP vận hành T23, checklist Rubix 4★'},
+  {id:'BE7',name:'Dữ liệu / Hồ sơ',en:'Data',bg:'#F1EFE8',tc:'#444441',
+   desc:'As-built BIM, hồ sơ hoàn công, pháp lý, số hóa tài liệu.',
+   ex:'Hồ sơ pháp lý T23, as-built model, change log'},
+  {id:'BE8',name:'Giám sát & Cải tiến',en:'Monitor',bg:'#FBEAF0',tc:'#72243E',
+   desc:'KPI, OKR, retrospective, vòng lặp cải tiến, audit định kỳ.',
+   ex:'OKR tuần/tháng, Health Score 8 trục, retrospective T6'},
+];
+
+const HELP_FE = [
+  {id:'T1',name:'Chính sách / Chủ trương',role:'Luật chơi',bg:'#E6F1FB',tc:'#0C447C',
+   who:'Nhà nước / Governing body',a:'Nhà nước',
+   desc:'Khung pháp lý, chủ trương đầu tư. Không ai được vi phạm. Tầng này đặt ra "luật".',
+   ex:'Quy định pháp lý xây dựng, giấy phép, tiêu chuẩn nhà nước'},
+  {id:'T2',name:'Chủ đầu tư / Liên danh',role:'Quyết định lớn',bg:'#EEEDFE',tc:'#3C3489',
+   who:'CĐT / Steering Committee',a:'CĐT',
+   desc:'Quyết định chiến lược, ngân sách lớn (L2–L3), thay đổi tầm nhìn, M&A.',
+   ex:'Phê duyệt ngân sách, quyết định M&A, thay đổi concept tổng'},
+  {id:'T3',name:'PMO / EPC / Tổng thầu',role:'Điều phối thực thi',bg:'#E1F5EE',tc:'#085041',
+   who:'PMO (bạn) / EPC Lead',a:'PMO',
+   desc:'Gatekeeper toàn hệ thống. Ký Level 1. Không để quyết định nhảy tầng.',
+   ex:'Duyệt change L1, điều phối team TQ, báo cáo tuần CĐT'},
+  {id:'T4',name:'Nhà thầu / Vendor',role:'Làm cho đúng',bg:'#FAEEDA',tc:'#633806',
+   who:'Team TQ / Nhà thầu thi công',a:'Nhà thầu / Team TQ',
+   desc:'Thực thi trên object cụ thể. Không được tự đổi vật liệu/phạm vi chưa duyệt.',
+   ex:'Thi công theo BIM, submit RFI khi chưa rõ, nhật ký hàng ngày'},
+  {id:'T5',name:'Vận hành / Khai thác',role:'Dùng cho bền',bg:'#EAF3DE',tc:'#27500A',
+   who:'FM Team / Rubix / Khách thuê',a:'FM / Đơn vị vận hành',
+   desc:'Sống lâu nhất với công trình. Soi ngược thiết kế từ góc vận hành. Rubix đánh giá tại tầng này.',
+   ex:'Vận hành T23/T16, phản hồi Rubix 4★, báo cáo hiệu suất'},
+];
+
+const HELP_MATRIX = [
+  ['CĐT','CĐT','PMO','PMO','CĐT'],
+  ['CĐT','CĐT','PMO','PMO','PMO'],
+  ['CĐT','PMO','PMO','Team TQ','PMO'],
+  ['PMO','PMO','PMO','Team TQ','FM'],
+  ['PMO','PMO','QS','QS','FM'],
+  ['PMO','PMO','PMO','Team TQ','FM'],
+  ['PMO','PMO','PMO','Team TQ','FM'],
+  ['PMO','CĐT','PMO','QA/QC','FM'],
+];
+
+const PILL_COLORS = {
+  'CĐT':['#E6F1FB','#0C447C'],'PMO':['#E1F5EE','#085041'],
+  'Team TQ':['#FAEEDA','#633806'],'FM':['#EAF3DE','#27500A'],
+  'QS':['#EEEDFE','#3C3489'],'QA/QC':['#FCEBEB','#791F1F'],
+};
+
+function renderHelpModal() {
+  // BE grid
+  const beGrid = document.getElementById('help-be-grid');
+  if (beGrid && !beGrid.innerHTML) {
+    beGrid.innerHTML = HELP_BE.map(b=>`
+      <div style="background:#fff;border:0.5px solid #E2E2DC;border-radius:8px;padding:10px 12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="background:${b.bg};color:${b.tc};border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;font-family:monospace">${b.id}</div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#1A1A1A">${b.name}</div>
+            <div style="font-size:10px;color:#6B6B6B">${b.en}</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#444;line-height:1.55">${b.desc}</div>
+        <div style="font-size:10px;color:#888;margin-top:5px;padding:3px 7px;background:#F5F5F2;border-radius:4px;border-left:2px solid #ddd">
+          Ví dụ: ${b.ex}
+        </div>
+      </div>`).join('');
+  }
+
+  // FE list
+  const feList = document.getElementById('help-fe-list');
+  if (feList && !feList.innerHTML) {
+    feList.innerHTML = HELP_FE.map((f,i)=>`
+      <div style="display:flex;gap:12px;padding:10px 0;${i<4?'border-bottom:1px solid #F5F5F2':''}">
+        <div style="background:${f.bg};color:${f.tc};border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;min-width:44px;text-align:center;flex-shrink:0;align-self:flex-start">${f.id}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px">
+            <div style="font-size:13px;font-weight:600;color:#1A1A1A">${f.name}</div>
+            <div style="font-size:10px;color:${f.tc};background:${f.bg};padding:1px 7px;border-radius:10px">${f.role}</div>
+          </div>
+          <div style="font-size:11px;color:#6B6B6B;margin-bottom:2px">👤 ${f.who}</div>
+          <div style="font-size:11px;color:#444;line-height:1.55">${f.desc}</div>
+          <div style="font-size:10px;color:#888;margin-top:4px;padding:3px 7px;background:#F5F5F2;border-radius:4px;border-left:2px solid #ddd">
+            Ví dụ: ${f.ex}
+          </div>
+          <div style="font-size:10px;color:${f.tc};margin-top:4px;font-weight:600">Chữ ký (A): ${f.a}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Matrix
+  const mt = document.getElementById('help-matrix-table');
+  if (mt && !mt.innerHTML) {
+    const thStyle = 'padding:6px 8px;background:#1A2F5A;color:#fff;text-align:center;font-size:10px;font-weight:500;white-space:nowrap';
+    const tdStyle = 'padding:6px 8px;text-align:center;border-bottom:0.5px solid #F0F0F0;border-right:0.5px solid #F0F0F0';
+    const feCol = 'padding:6px 10px;background:#F5F5F2;font-size:10px;font-weight:500;color:#1A2F5A;white-space:nowrap;border-bottom:0.5px solid #E0E0E0';
+    const header = `<thead><tr><th style="${thStyle}">Tầng \\ Trục</th>${HELP_BE.map(b=>`<th style="${thStyle}">${b.id}<br><span style="font-weight:400;font-size:9px">${b.name.split('/')[0]}</span></th>`).join('')}</tr></thead>`;
+    const body = `<tbody>${HELP_FE.map((f,fi)=>`<tr><td style="${feCol}">${f.id}<br><span style="font-size:9px;color:#6B6B6B;font-weight:400">${f.role}</span></td>${HELP_MATRIX[fi].map(a=>{
+      const [bg,tc]=PILL_COLORS[a]||['#F5F5F2','#444'];
+      return `<td style="${tdStyle}"><span style="background:${bg};color:${tc};padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600;white-space:nowrap">${a}</span></td>`;
+    }).join('')}</tr>`).join('')}</tbody>`;
+    mt.innerHTML = header + body;
+  }
+}
+
+function showHelpTab(id, btn) {
+  document.querySelectorAll('.help-pane').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.help-tab').forEach(b=>b.classList.remove('on'));
+  const el = document.getElementById('help-'+id);
+  if(el) el.style.display='block';
+  btn.classList.add('on');
+}
+
+// Hook vào openModal để render lazy
+const _origOpenModal = openModal;
+function openModal(id) {
+  if(id==='modal-8x5') renderHelpModal();
+  _origOpenModal(id);
 }
 
 loadFromSheets().then(() => refreshAll());
