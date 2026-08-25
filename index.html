@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ops Dashboard · BIM × 8×5 · Governance</title>
+<style>
+:root{
+  --navy:#1A2F5A;--blue:#3D5CF5;--teal:#0D6E4A;--amber:#B86B00;--red:#C0392B;
+  --bg:#F5F5F2;--white:#fff;--border:#E2E2DC;--border-s:#C8C8C0;
+  --text:#1A1A1A;--muted:#6B6B6B;--light:#F0F0EE;
+  --radius:8px;--font:system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px}
+
+/* Topbar */
+.topbar{background:var(--navy);color:#fff;padding:0 16px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:100}
+.topbar-title{font-size:15px;font-weight:600;white-space:nowrap}
+.topbar-sub{font-size:11px;color:#A0AEC0;flex:1}
+.project-sel{font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;cursor:pointer;min-width:140px}
+.project-sel option{background:var(--navy);color:#fff}
+.btn{padding:6px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--border-s);background:var(--white);color:var(--text);transition:background .15s}
+.btn:hover{background:var(--light)}
+.btn-primary{background:var(--blue);color:#fff;border-color:transparent}
+.btn-primary:hover{background:#2D4CE5}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-teal{background:#E0F8EE;color:var(--teal);border-color:var(--teal)}
+.btn-red{background:#FCEBEB;color:var(--red);border-color:var(--red)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+
+/* Tabs */
+.tabs{background:var(--white);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 16px;scrollbar-width:none;position:sticky;top:52px;z-index:99}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:11px 14px;font-size:12px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+
+/* Panels */
+.panel{display:none;padding:16px}
+.panel.active{display:block}
+
+/* Cards & layout */
+.card{background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:720px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.sec{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px}
+.empty{text-align:center;color:var(--muted);padding:32px;font-size:12px}
+
+/* KPI */
+.kpi{text-align:center;padding:12px}
+.kpi-val{font-size:24px;font-weight:700;line-height:1}
+.kpi-label{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:var(--navy);color:#fff;padding:7px 12px;text-align:left;font-size:11px}
+.tbl td{padding:7px 12px;border-bottom:0.5px solid var(--border)}
+.tbl tr:hover td{background:var(--light)}
+.tbl-wrap{overflow-x:auto}
+
+/* Badges */
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
+
+/* Forms */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--white)}
+.modal-body{padding:16px 20px}
+.modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.close-btn{background:none;border:none;font-size:18px;color:var(--muted);cursor:pointer;line-height:1}
+.field{margin-bottom:10px}
+.lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:7px 10px;border:0.5px solid var(--border-s);border-radius:var(--radius);font-size:12px;font-family:var(--font);background:var(--white)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-offset:-1px}
+.row-f{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.c2{grid-template-columns:1fr 1fr}
+
+/* Filter chips */
+.filter-chip{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:500;background:var(--light);color:var(--muted);cursor:pointer;margin-right:4px;margin-bottom:4px}
+.filter-chip.active{background:var(--navy);color:#fff}
+.filter-chip:hover:not(.active){background:#E2E2DC}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title">🏗 Ops Dashboard · BIM × 8×5</div>
+    <div class="topbar-sub" id="topbar-sub">Loading...</div>
+  </div>
+  <select class="project-sel" id="project-sel" onchange="onProjectChange(this.value)"></select>
+  <button class="btn btn-ghost btn-sm" onclick="openAddProject()">+ Project</button>
+  <button class="btn btn-ghost btn-sm" onclick="boot()">🔄</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="sw('overview',this)">🏠 Portfolio</div>
+  <div class="tab" onclick="sw('bim',this)">🏗 BIM/Gate</div>
+  <div class="tab" onclick="sw('actions',this)">📋 Actions</div>
+  <div class="tab" onclick="sw('changes',this)">📝 Changes</div>
+  <div class="tab" onclick="sw('decisions',this)">⚖️ Decisions</div>
+  <div class="tab" onclick="sw('finance',this)">💰 Finance</div>
+  <div class="tab" onclick="sw('team',this)">🌏 Team QT</div>
+  <div class="tab" onclick="sw('ma',this)">🏭 M&A</div>
+  <div class="tab" onclick="sw('schedule',this)">📅 Schedule</div>
+  <div class="tab" onclick="sw('report',this)">📤 Report</div>
+  <div class="tab" onclick="openBimReference()" style="border-left:1px solid var(--border);color:#3D5CF5">? BIM</div>
+</div>
+
+<!-- OVERVIEW: Investor Cockpit -->
+<div id="panel-overview" class="panel active">
+  <div class="sec">🔴 Exceptions & Decisions Required</div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+    <div id="exception-strip"></div>
+  </div>
+
+  <div class="sec">Portfolio Snapshot</div>
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr>
+          <th>Project</th><th>BIM Stage</th><th>Gate</th><th>Gate Readiness</th>
+          <th>CAPEX Baseline</th><th>ΔCost</th><th>Open Issues</th><th>Pending Decisions</th><th>Critical Issue</th>
+        </tr></thead>
+        <tbody id="portfolio-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="sec">⚖️ Decisions Pending CĐT</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div id="pending-decisions-list"></div>
+  </div>
+</div>
+
+<!-- BIM/GATE -->
+<div id="panel-bim" class="panel">
+  <div id="bim-content"><div class="empty">Select a project to view BIM Gate.</div></div>
+</div>
+
+<!-- ACTIONS -->
+<div id="panel-actions" class="panel">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <select id="action-type-filter" onchange="renderActions()" style="font-size:11px;padding:4px 8px;width:auto">
+      <option value="all">All types</option>
+      <option value="action">📋 Action</option>
+      <option value="risk">⚠️ Risk</option>
+      <option value="issue">🔴 Issue</option>
+      <option value="assumption">💡 Assumption</option>
+      <option value="rfi">❓ RFI</option>
+    </select>
+    <select id="action-status-filter" onchange="renderActions()" style="font-size:11px;padding:4px 8px;width:auto">
+      <option value="open">Open</option>
+      <option value="closed">Closed</option>
+      <option value="all">All</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="openAddAction(S.activeProjectId)">+ Add</button>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto">Action / Risk / Issue / Assumption / RFI — one register, filter by type</span>
+  </div>
+  <div id="action-list"></div>
+</div>
+
+<!-- CHANGES -->
+<div id="panel-changes" class="panel">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary btn-sm" onclick="openAddChange()">+ Log Change</button>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto">Only changes with baseline impact. R/A/ΔCost/ΔTime/ΔCapacity/ΔBiz required.</span>
+  </div>
+  <div id="change-list"></div>
+</div>
+
+<!-- DECISIONS -->
+<div id="panel-decisions" class="panel">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary btn-sm" onclick="openAddDecision()">+ Log Decision</button>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto">Decision Register — corporate memory. Separate from Change Log.</span>
+  </div>
+  <div id="decision-list"></div>
+</div>
+
+<!-- FINANCE -->
+<div id="panel-finance" class="panel">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary btn-sm" onclick="openAddFinance(S.activeProjectId)">+ Baseline</button>
+    <span style="font-size:11px;color:var(--muted);margin-left:auto">Versioned baselines: Concept → FS CAPEX → Design → Contract → Actual</span>
+  </div>
+  <div id="finance-list"></div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Project -->
+<div class="overlay" id="modal-project">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-proj-title">New Project</div>
+      <button class="close-btn" onclick="closeModal('modal-project')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="proj-id-hidden">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Project name *</label><input type="text" id="proj-name" placeholder="VD: 16 Láng Hạ T2"></div>
+        <div class="field"><label class="lbl">Type</label>
+          <select id="proj-type">
+            <option value="office">Văn phòng cho thuê</option><option value="hotel">Khách sạn</option>
+            <option value="mixed">Mixed-use</option><option value="construction">Thi công</option><option value="other">Khác</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Country / Location</label><input type="text" id="proj-country" placeholder="Vietnam"></div>
+        <div class="field"><label class="lbl">PMO Lead</label><input type="text" id="proj-lead" placeholder="PMO"></div>
+        <div class="field"><label class="lbl">Status</label>
+          <select id="proj-status">
+            <option value="active">Active</option><option value="on-hold">On Hold</option>
+            <option value="completed">Completed</option><option value="archived">Archived</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">BIM Stage</label>
+          <select id="proj-bimstage">
+            <option value="01-concept">01 Concept BIM</option><option value="02-feasibility">02 Feasibility BIM</option>
+            <option value="03-design">03 Design BIM</option><option value="04-construction">04 Construction BIM</option>
+            <option value="05-as-built">05 As-Built BIM</option><option value="06-operation">06 Operation BIM</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Start date</label><input type="date" id="proj-start"></div>
+        <div class="field"><label class="lbl">Target completion</label><input type="date" id="proj-target"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note / Context</label><textarea id="proj-note" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-project')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="proj-del-btn" style="display:none" onclick="deleteProjectFromModal()">Archive</button>
+      <button class="btn btn-primary" onclick="saveProject()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Action -->
+<div class="overlay" id="modal-action">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700" id="modal-act-title">New Action</div>
+      <button class="close-btn" onclick="closeModal('modal-action')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="act-id-hidden">
+      <div class="row-f c2">
+        <div class="field"><label class="lbl">Project</label><select id="act-project"></select></div>
+        <div class="field"><label class="lbl">Type</label>
+          <select id="act-type">
+            <option value="action">📋 Action</option><option value="risk">⚠️ Risk</option>
+            <option value="issue">🔴 Issue</option><option value="assumption">💡 Assumption</option><option value="rfi">❓ RFI</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Title *</label><input type="text" id="act-title" placeholder="Clear, actionable title"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Description / Details</label><textarea id="act-desc" rows="2"></textarea></div>
+        <div class="field"><label class="lbl">Priority</label>
+          <select id="act-priority">
+            <option value="high">🔴 High</option><option value="med">🟡 Medium</option><option value="low">🟢 Low</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Status</label>
+          <select id="act-status">
+            <option value="open">Open</option><option value="in-progress">In Progress</option>
+            <option value="done">Done</option><option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">R — Responsible</label><input type="text" id="act-responsible" placeholder="Who does the work"></div>
+        <div class="field"><label class="lbl">A — Accountable</label><input type="text" id="act-accountable" placeholder="Who is answerable"></div>
+        <div class="field"><label class="lbl">Due date</label><input type="date" id="act-due"></div>
+        <div class="field"><label class="lbl">BIM Stage</label>
+          <select id="act-bimstage">
+            <option value="01-concept">01 Concept</option><option value="02-feasibility">02 FS</option>
+            <option value="03-design">03 Design</option><option value="04-construction">04 Construction</option>
+            <option value="05-as-built">05 As-Built</option><option value="06-operation">06 Operation</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Impact</label><input type="text" id="act-impact" placeholder="Cost / Time / Revenue / Capacity"></div>
+        <div class="field"><label class="lbl">Link to evidence</label><input type="text" id="act-link" placeholder="https://drive..."></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note</label><input type="text" id="act-note"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-action')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="act-del-btn" style="display:none" onclick="deleteActionFromModal()">🗑 Delete</button>
+      <button class="btn btn-primary" onclick="saveAction()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change -->
+<div class="overlay" id="modal-change">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">Log Change</div>
+      <button class="close-btn" onclick="closeModal('modal-change')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="chg-id-hidden">
+      <div class="row-f c2">
+        <div class="field"><label class="lbl">Project</label><select id="chg-project"></select></div>
+        <div class="field"><label class="lbl">BIM Stage</label>
+          <select id="chg-bimstage">
+            <option value="01-concept">01 Concept</option><option value="02-feasibility">02 FS</option>
+            <option value="03-design">03 Design</option><option value="04-construction">04 Construction</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Title *</label><input type="text" id="chg-title" placeholder="VD: Adjust circulation T1 — add corridor 1.5m"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Content / Description</label><textarea id="chg-content" rows="2"></textarea></div>
+        <div class="field"><label class="lbl">Authority Level</label>
+          <select id="chg-authority">
+            <option value="L1">L1 — PMO (no baseline impact)</option>
+            <option value="L2">L2 — CĐT (cost/schedule impact)</option>
+            <option value="L3">L3 — Board (strategic)</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Baseline reference</label><input type="text" id="chg-baseline" placeholder="VD: Concept Baseline v1 / FS CAPEX"></div>
+        <div class="field"><label class="lbl">R — Responsible</label><input type="text" id="chg-responsible"></div>
+        <div class="field"><label class="lbl">A — Accountable</label><input type="text" id="chg-accountable" placeholder="PMO"></div>
+        <div class="field"><label class="lbl">ΔCapex (tr.đ)</label><input type="text" id="chg-dcapex" placeholder="0 / +500 / —"></div>
+        <div class="field"><label class="lbl">ΔTime (days)</label><input type="text" id="chg-dtime" placeholder="0 / +14 / —"></div>
+        <div class="field"><label class="lbl">ΔCapacity</label><input type="text" id="chg-dcap" placeholder="VD: -15 workstations"></div>
+        <div class="field"><label class="lbl">ΔBusiness / Revenue</label><input type="text" id="chg-dbiz" placeholder="VD: Revenue -5% / TBD"></div>
+        <div class="field"><label class="lbl">Status</label>
+          <select id="chg-status">
+            <option value="pending">Pending approval</option><option value="approved">Approved</option>
+            <option value="rejected">Rejected</option><option value="implemented">Implemented</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Note</label><input type="text" id="chg-note"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-change')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="chg-del-btn" style="display:none" onclick="deleteChangeFromModal()">🗑 Delete</button>
+      <button class="btn btn-primary" onclick="saveChange()">💾 Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Decision -->
+<div class="overlay" id="modal-decision">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">Log Decision</div>
+      <button class="close-btn" onclick="closeModal('modal-decision')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="dec-id-hidden">
+      <div class="row-f c2">
+        <div class="field"><label class="lbl">Project</label><select id="dec-project"></select></div>
+        <div class="field"><label class="lbl">BIM Stage</label>
+          <select id="dec-bimstage">
+            <option value="01-concept">01 Concept</option><option value="02-feasibility">02 FS</option>
+            <option value="03-design">03 Design</option><option value="04-construction">04 Construction</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Subject *</label><input type="text" id="dec-subject" placeholder="VD: Approve functional zoning T2 Event Hall"></div>
+        <div class="field"><label class="lbl">Authority Level</label>
+          <select id="dec-authority">
+            <option value="L1">L1 — PMO</option><option value="L2">L2 — CĐT</option><option value="L3">L3 — CĐT + Board</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Accountable (A)</label><input type="text" id="dec-accountable" placeholder="CĐT"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Options</label><textarea id="dec-options" rows="2" placeholder="Option A: ...\nOption B: ..."></textarea></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">PM Recommendation</label><textarea id="dec-recommendation" rows="2"></textarea></div>
+        <div class="field"><label class="lbl">ΔCapex</label><input type="text" id="dec-dcapex" placeholder="+500tr / 0 / TBD"></div>
+        <div class="field"><label class="lbl">ΔTime</label><input type="text" id="dec-dtime" placeholder="+14d / 0"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Business / Capacity Impact</label><input type="text" id="dec-dbiz" placeholder="VD: -15 workstations, FS cannot start until approved"></div>
+        <div class="field"><label class="lbl">Due date</label><input type="date" id="dec-due"></div>
+        <div class="field"><label class="lbl">Status</label>
+          <select id="dec-status">
+            <option value="pending">Pending</option><option value="approved">Approved</option>
+            <option value="rejected">Rejected</option><option value="deferred">Deferred</option>
+          </select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Link to evidence / documents</label><input type="text" id="dec-evidence" placeholder="https://drive..."></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note</label><textarea id="dec-note" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-decision')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="dec-del-btn" style="display:none" onclick="deleteDecisionFromModal()">🗑 Delete</button>
+      <button class="btn btn-primary" onclick="saveDecision()">💾 Log Decision</button>
+    </div>
+  </div>
+</div>
+
+<!-- Finance -->
+<div class="overlay" id="modal-finance">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">Finance Baseline</div>
+      <button class="close-btn" onclick="closeModal('modal-finance')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fin-id-hidden">
+      <input type="hidden" id="fin-project-id">
+      <div class="row-f c2">
+        <div class="field"><label class="lbl">Type</label>
+          <select id="fin-type">
+            <option value="concept">Concept Budget</option><option value="fs">FS CAPEX</option>
+            <option value="design">Design Estimate</option><option value="contract">Contract Value</option>
+            <option value="actual">Actual Cost</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Label / Version</label><input type="text" id="fin-label" placeholder="VD: FS CAPEX Rev.01 — post market study"></div>
+        <div class="field"><label class="lbl">Amount (tr.đ) *</label><input type="number" id="fin-amount" placeholder="0"></div>
+        <div class="field"><label class="lbl">Actual to date (tr.đ)</label><input type="number" id="fin-actual" placeholder="0"></div>
+        <div class="field"><label class="lbl">Approved by</label><input type="text" id="fin-approved-by" placeholder="CĐT / PMO"></div>
+        <div class="field"><label class="lbl">Approval date</label><input type="date" id="fin-approval-date"></div>
+        <div class="field" style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding-top:16px">
+          <input type="checkbox" id="fin-current" style="width:16px;height:16px">
+          <label for="fin-current" style="font-size:12px">Mark as current baseline (replaces previous)</label>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note</label><input type="text" id="fin-note" placeholder="Context / reason for this baseline version"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-finance')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="fin-del-btn" style="display:none" onclick="deleteFinanceFromModal()">🗑 Delete</button>
+      <button class="btn btn-primary" onclick="saveFinance()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM QT -->
+<div id="panel-team" class="panel">
+  <div class="sec">🕐 Time Zone Clocks</div>
+  <div class="g3" id="tz-clocks" style="margin-bottom:14px"></div>
+
+  <div class="g2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:600">👥 International Team</div>
+        <button class="btn btn-primary btn-sm" onclick="openAddMember()">+ Add member</button>
+      </div>
+      <div id="team-list"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:12px;font-weight:600;margin-bottom:8px">📅 Recurring Meetings</div>
+      <div id="meeting-list" style="margin-bottom:10px"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+        <div class="field" style="flex:2;margin:0"><input type="text" id="mtg-name" placeholder="Meeting name"></div>
+        <div class="field" style="flex:1;margin:0"><input type="time" id="mtg-time" value="09:00"></div>
+        <div class="field" style="flex:1;margin:0">
+          <select id="mtg-day">
+            <option value="1">Thứ 2</option><option value="2">Thứ 3</option><option value="3">Thứ 4</option>
+            <option value="4">Thứ 5</option><option value="5" selected>Thứ 6</option>
+          </select>
+        </div>
+        <div class="field" style="flex:2;margin:0"><input type="text" id="mtg-link" placeholder="Meeting link"></div>
+        <button class="btn btn-primary btn-sm" onclick="saveMeeting()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:600">🇨🇳 Bilingual Report — VI + ZH</div>
+      <button class="btn btn-sm" style="background:#EEF2FF;color:#3D5CF5;border-color:#3D5CF5" onclick="generateZhReport()">Generate Report</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted)">Tạo báo cáo song ngữ VI+ZH cho team Trung Quốc — gồm Open Actions, Pending Changes, Gate Status. Copy và gửi qua WeChat.</div>
+  </div>
+</div>
+
+<!-- M&A TRACKER -->
+<div id="panel-ma" class="panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:12px;color:var(--muted)">M&A pipeline — Vệ sinh công nghiệp · Sự kiện · Khác</div>
+    <button class="btn btn-primary btn-sm" onclick="openAddMa()">+ Add company</button>
+  </div>
+  <div id="ma-kanban" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px"></div>
+  <div class="sec">📋 Detailed list</div>
+  <div id="ma-table"></div>
+</div>
+
+<!-- SCHEDULE -->
+<div id="panel-schedule" class="panel">
+  <div class="g2">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="background:#1A2F5A;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="color:#fff;font-size:13px;font-weight:600">💳 Payment Schedule</div>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:none" onclick="openAddPayment()">+ Add</button>
+      </div>
+      <div id="payment-list" style="max-height:420px;overflow-y:auto"></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="background:#3D5CF5;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="color:#fff;font-size:13px;font-weight:600">✅ PMO To-Do</div>
+        <button class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:none" onclick="openAddTodo()">+ Add</button>
+      </div>
+      <div id="todo-list" style="max-height:420px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div id="panel-report" class="panel">
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+    <button class="btn btn-primary btn-sm" onclick="renderReport()">🔄 Generate</button>
+    <button class="btn btn-sm" onclick="copyReport()">📋 Copy</button>
+    <span style="font-size:11px;color:var(--muted)">Weekly governance report for selected project</span>
+  </div>
+  <textarea id="report-preview" style="width:100%;height:480px;font-family:monospace;font-size:11px;padding:12px;border:0.5px solid var(--border);border-radius:8px;background:var(--light);resize:vertical;line-height:1.6" readonly></textarea>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- BIM Reference -->
+<div class="overlay" id="modal-bim-ref">
+  <div class="modal" style="max-width:680px;max-height:90vh">
+    <div class="modal-header" style="position:sticky;top:0;background:var(--white)">
+      <div style="font-size:14px;font-weight:700">BIM Across the Project Lifecycle</div>
+      <button class="close-btn" onclick="closeModal('modal-bim-ref')">✕</button>
+    </div>
+    <div class="modal-body" id="bim-ref-content" style="padding:16px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('modal-bim-ref')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ZH Report -->
+<div class="overlay" id="modal-zh-report">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">🇨🇳 Bilingual Report VI+ZH</div>
+      <button class="close-btn" onclick="closeModal('modal-zh-report')">✕</button>
+    </div>
+    <div class="modal-body">
+      <textarea id="zh-report-text" style="width:100%;height:340px;font-family:monospace;font-size:11px;padding:10px;border:0.5px solid var(--border);border-radius:8px;background:var(--light);line-height:1.7" readonly></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-zh-report')">Close</button>
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText($('zh-report-text').value).then(()=>toast('Copied ✓'))">📋 Copy for WeChat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Member modal -->
+<div class="overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">Team Member</div>
+      <button class="close-btn" onclick="closeModal('modal-member')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mb-id-hidden">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Name *</label><input type="text" id="mb-name"></div>
+        <div class="field"><label class="lbl">Role</label><input type="text" id="mb-role" placeholder="Project Manager / 项目经理"></div>
+        <div class="field"><label class="lbl">Nationality</label><input type="text" id="mb-nat" placeholder="Vietnam / China"></div>
+        <div class="field"><label class="lbl">Timezone</label>
+          <select id="mb-tz">
+            <option value="GMT+7 Hà Nội">🇻🇳 GMT+7 Hà Nội</option>
+            <option value="GMT+8 Thượng Hải">🇨🇳 GMT+8 Thượng Hải</option>
+            <option value="GMT+8 Singapore">🇸🇬 GMT+8 Singapore</option>
+            <option value="GMT+9 Tokyo">🇯🇵 GMT+9 Tokyo</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Language</label><input type="text" id="mb-lang" placeholder="VI / ZH / EN"></div>
+        <div class="field"><label class="lbl">WeChat / Zalo</label><input type="text" id="mb-wechat"></div>
+        <div class="field"><label class="lbl">Status</label>
+          <select id="mb-status"><option value="active">Active</option><option value="on-leave">On leave</option><option value="inactive">Inactive</option></select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note</label><input type="text" id="mb-note"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-member')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="mb-del-btn" style="display:none" onclick="deleteMemberFromModal()">Remove</button>
+      <button class="btn btn-primary" onclick="saveMember()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- M&A modal -->
+<div class="overlay" id="modal-ma">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">M&A Target</div>
+      <button class="close-btn" onclick="closeModal('modal-ma')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ma-id-hidden">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Company name *</label><input type="text" id="ma-name"></div>
+        <div class="field"><label class="lbl">Type</label>
+          <select id="ma-type"><option value="cleaning">🧹 Vệ sinh CN</option><option value="events">🎪 Sự kiện</option><option value="other">🏢 Khác</option></select>
+        </div>
+        <div class="field"><label class="lbl">Stage</label>
+          <select id="ma-stage">
+            <option value="sourcing">🔍 Sourcing</option><option value="outreach">📞 Outreach</option>
+            <option value="dd">🔬 Due Diligence</option><option value="negotiation">🤝 Negotiation</option><option value="closed">✅ Closed</option>
+          </select>
+        </div>
+        <div class="field"><label class="lbl">Location / Địa bàn</label><input type="text" id="ma-location" placeholder="Hà Nội"></div>
+        <div class="field"><label class="lbl">DD Score (0–100)</label><input type="number" id="ma-score" min="0" max="100"></div>
+        <div class="field"><label class="lbl">Valuation (tr.đ)</label><input type="number" id="ma-valuation"></div>
+        <div class="field"><label class="lbl">Contact / Founder</label><input type="text" id="ma-contact"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note / Next step</label><textarea id="ma-note" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-ma')">Cancel</button>
+      <button class="btn btn-red btn-sm" id="ma-del-btn" style="display:none" onclick="deleteMaFromModal()">Delete</button>
+      <button class="btn btn-primary" onclick="saveMa()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment modal -->
+<div class="overlay" id="modal-payment">
+  <div class="modal">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">Payment</div>
+      <button class="close-btn" onclick="closeModal('modal-payment')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="row-f c2">
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Payment name *</label><input type="text" id="pay-name" placeholder="VD: Tiền thuê mặt bằng T23"></div>
+        <div class="field"><label class="lbl">Project</label><select id="pay-project"></select></div>
+        <div class="field"><label class="lbl">Amount (tr.đ)</label><input type="number" id="pay-amount"></div>
+        <div class="field"><label class="lbl">Due date</label><input type="date" id="pay-due"></div>
+        <div class="field"><label class="lbl">Recurring</label>
+          <select id="pay-recur"><option value="">One-time</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option></select>
+        </div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Note</label><input type="text" id="pay-note"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-payment')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePayment()">💾 Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Todo modal -->
+<div class="overlay" id="modal-todo">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <div style="font-size:14px;font-weight:700">PMO Task</div>
+      <button class="close-btn" onclick="closeModal('modal-todo')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label class="lbl">Task *</label><input type="text" id="todo-title" placeholder="VD: Gửi báo cáo tuần cho CĐT"></div>
+      <div class="row-f c2">
+        <div class="field"><label class="lbl">Priority</label>
+          <select id="todo-priority"><option value="high">🔴 High</option><option value="med" selected>🟡 Medium</option><option value="low">🟢 Low</option></select>
+        </div>
+        <div class="field"><label class="lbl">Due date</label><input type="date" id="todo-due"></div>
+      </div>
+      <div class="field"><label class="lbl">Note</label><input type="text" id="todo-note"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" onclick="closeModal('modal-todo')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTodo()">💾 Add task</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
