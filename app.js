@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 // ── CONFIG ───────────────────────────────────────────────────
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw5bKmOhcbvb0Q2cM8_ZoHYSacoRK0LZWKgrJqfFHzGj-pYbEU29WiP1Q7asecoi3Jn/exec';
+const SHEET_URL = 'PASTE_YOUR_APPS_SCRIPT_URL_HERE';
 const APP_VER   = 'v5.0';
 
 // ── BIM CONSTANTS ─────────────────────────────────────────────
@@ -44,7 +44,7 @@ const PRIORITY_CFG = {
   med: {label:'🟡 Medium',color:'#B86B00',bg:'#FFF3DC'},
   low: {label:'🟢 Low',color:'#0D6E4A',bg:'#E0F8EE'},
 };
-const AUTHORITY_LEVELS = ['L1 — PMO','L2 — CĐT','L3 — CĐT + Board'];
+const AUTHORITY_LEVELS = ['L1 — PMO','L2 — Owner','L3 — Owner + Board'];
 const FINANCE_TYPES = {
   concept:'Concept Budget',fs:'FS CAPEX',design:'Design Estimate',
   contract:'Contract Value',actual:'Actual Cost',
@@ -73,7 +73,7 @@ let S = {
 let _syncStatus = 'offline';
 let _syncTimer  = null;
 let _pendingSave = false;
-const LS_KEY = 'ops_gov_v5';
+const LS_KEY = 'ops_gov_v6_preview';
 
 // ── HELPERS ───────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -141,7 +141,7 @@ async function boot() {
   renderAll();
 
   if (SHEET_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
-    syncBadge('offline','⚙️ Configure SHEET_URL');
+    syncBadge('offline','Personal dashboard · saved in this browser');
     return;
   }
   const data = await apiFetch('boot');
@@ -312,18 +312,18 @@ async function renderOverview() {
         </div>
         <span style="background:${gst.bg};color:${gst.color};padding:1px 7px;border-radius:8px;font-size:9px;font-weight:600">${gst.label}</span>
       </td>
-      <td style="padding:8px 12px;font-size:11px">${r.capexBaseline && r.capexBaseline!='0'?Number(r.capexBaseline).toLocaleString('vi-VN')+' tr':'—'}</td>
+      <td style="padding:8px 12px;font-size:11px">${r.capexBaseline && r.capexBaseline!='0'?Number(r.capexBaseline).toLocaleString('en-US')+' tr':'—'}</td>
       <td style="padding:8px 12px;font-size:11px;color:${r.deltaCapex&&r.deltaCapex!='—'&&r.deltaCapex!='0%'?'#C0392B':'inherit'}">${r.deltaCapex||'—'}</td>
       <td style="padding:8px 12px;text-align:center"><span style="font-weight:700;color:${+r.openActions>0?'#B86B00':'#888'}">${r.openActions||0}</span></td>
       <td style="padding:8px 12px;text-align:center"><span style="font-weight:700;color:${+r.pendingDecisions>0?'#C0392B':'#888'}">${r.pendingDecisions||0}</span></td>
       <td style="padding:8px 12px;font-size:10px;color:#888;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.criticalIssue||'—'}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="9" style="padding:20px;text-align:center;color:#aaa">Chưa có dự án nào. + New Project để bắt đầu.</td></tr>`;
+  }).join('') || `<tr><td colspan="9" style="padding:20px;text-align:center;color:#aaa">No projects yet. Use + Project to begin.</td></tr>`;
 
-  // Pending decisions for CĐT
+  // Pending decisions for Owner
   const decEl=$('pending-decisions-list');
   if(decEl) decEl.innerHTML = !S.pendingDecisions.length
-    ? `<div style="padding:14px;font-size:11px;color:#888;text-align:center">✅ Không có quyết định nào đang chờ CĐT</div>`
+    ? `<div style="padding:14px;font-size:11px;color:#888;text-align:center">✅ No owner decisions are pending</div>`
     : S.pendingDecisions.slice(0,5).map(d=>{
         const p=S.projects.find(x=>x.id===d.projectId);
         return `<div style="padding:8px 14px;border-bottom:0.5px solid var(--border)">
@@ -331,7 +331,7 @@ async function renderOverview() {
             <span style="font-size:10px;font-weight:700;color:#C0392B;background:#FCEBEB;padding:1px 7px;border-radius:8px">${d.authorityLevel||'L2'}</span>
             <span style="font-size:12px;font-weight:600">${d.subject}</span>
           </div>
-          <div style="font-size:10px;color:#6B6B6B">${p?.name||'—'} · Due: <span style="color:#C0392B;font-weight:600">${d.dueDate||'—'}</span> · A: ${d.accountable||'CĐT'}</div>
+          <div style="font-size:10px;color:#6B6B6B">${p?.name||'—'} · Due: <span style="color:#C0392B;font-weight:600">${d.dueDate||'—'}</span> · A: ${d.accountable||'Owner'}</div>
           ${d.recommendation?`<div style="font-size:10px;color:#3D5CF5;margin-top:2px">PM Rec: ${d.recommendation}</div>`:''}
         </div>`;
       }).join('');
@@ -343,7 +343,7 @@ async function renderBim() {
   const proj= S.projects.find(p=>p.id===pid);
   const el  = $('bim-content');
   if(!el) return;
-  if(!proj) { el.innerHTML='<div class="empty">Chọn dự án để xem BIM Gate.</div>'; return; }
+  if(!proj) { el.innerHTML='<div class="empty">Select a project to view its BIM Gate.</div>'; return; }
 
   await ensureFinance(pid);
   const curStage = getBimStage(proj.bimStage||'01-concept');
@@ -387,10 +387,10 @@ async function renderBim() {
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
       ${fins.map(f=>`<div style="background:${f.isCurrent==='TRUE'||f.isCurrent?'#EEF2FF':'var(--surface-1)'};border:0.5px solid var(--border);border-radius:8px;padding:8px 12px;flex:1;min-width:100px">
         <div style="font-size:9px;color:var(--text-secondary);font-weight:600;text-transform:uppercase">${FINANCE_TYPES[f.type]||f.type}</div>
-        <div style="font-size:14px;font-weight:700;color:#1A2F5A">${Number(f.amount||0).toLocaleString('vi-VN')} tr</div>
+        <div style="font-size:14px;font-weight:700;color:#1A2F5A">${Number(f.amount||0).toLocaleString('en-US')} tr</div>
         <div style="font-size:10px;color:var(--text-secondary)">${f.approvedBy||''} · ${f.approvalDate||''}</div>
       </div>`).join('')}
-    </div>` : `<div style="font-size:11px;color:var(--text-secondary);margin-top:6px">Chưa có baseline. <button onclick="openAddFinance('${pid}')" style="font-size:11px;color:#3D5CF5;background:none;border:none;cursor:pointer">+ Add baseline</button></div>`;
+    </div>` : `<div style="font-size:11px;color:var(--text-secondary);margin-top:6px">No baseline yet. <button onclick="openAddFinance('${pid}')" style="font-size:11px;color:#3D5CF5;background:none;border:none;cursor:pointer">+ Add baseline</button></div>`;
 
   el.innerHTML = `
     <div style="background:#1A2F5A;color:#fff;border-radius:12px;padding:16px 20px;margin-bottom:12px">
@@ -422,13 +422,13 @@ async function renderBim() {
             ? `<div style="padding:8px;background:${GATE_STATUS[curGate.decision]?.bg};color:${GATE_STATUS[curGate.decision]?.color};border-radius:8px;font-size:13px;font-weight:700;text-align:center;margin-bottom:6px">${GATE_STATUS[curGate.decision]?.label}</div>
                <div style="font-size:10px;color:var(--text-secondary)">${curGate.decisionBy||'PMO'} · ${curGate.decisionDate||''}</div>`
             : rd>=70
-              ? `<div style="font-size:11px;color:#0D6E4A;margin-bottom:8px">🟢 Evidence sufficient — CĐT can decide</div>
+              ? `<div style="font-size:11px;color:#0D6E4A;margin-bottom:8px">🟢 Evidence sufficient — Owner can decide</div>
                  <div style="display:flex;gap:6px">
                    <button onclick="recordGate('${pid}','go')" style="flex:1;padding:7px;background:#E0F8EE;color:#0D6E4A;border:1px solid #0D6E4A;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">✅ GO</button>
                    <button onclick="recordGate('${pid}','revise')" style="flex:1;padding:7px;background:#EEF2FF;color:#3D5CF5;border:1px solid #3D5CF5;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">🔄 Revise</button>
                    <button onclick="recordGate('${pid}','no-go')" style="flex:1;padding:7px;background:#FCEBEB;color:#C0392B;border:1px solid #C0392B;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">❌ No-Go</button>
                  </div>`
-              : `<div style="font-size:11px;color:#B86B00">🟡 ${evidence.length-doneEv.length} evidence item(s) missing before CĐT decision</div>`
+              : `<div style="font-size:11px;color:#B86B00">🟡 ${evidence.length-doneEv.length} evidence item(s) missing before the owner decision</div>`
           }
         </div>
         <div style="background:var(--surface-2);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px">
@@ -619,7 +619,7 @@ function renderDecisions() {
           <div style="font-size:12px;font-weight:600">${d.subject}</div>
           ${d.recommendation?`<div style="font-size:11px;color:#3D5CF5;margin-top:2px">PM Rec: ${d.recommendation}</div>`:''}
           <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;font-size:10px;color:var(--text-secondary)">
-            <span>A: ${d.accountable||'CĐT'}</span>
+            <span>A: ${d.accountable||'Owner'}</span>
             ${d.dueDate?`<span style="color:${d.dueDate<today()&&!isDone?'#C0392B':'inherit'}">Due: ${d.dueDate}</span>`:''}
             ${d.deltaCapex?`<span style="color:#C0392B">ΔCost: ${d.deltaCapex}</span>`:''}
             ${d.deltaBiz?`<span>ΔBiz: ${d.deltaBiz}</span>`:''}
@@ -656,7 +656,7 @@ function renderFinance() {
   const pid  = S.activeProjectId;
   const fins = pid ? (S._finance[pid]||[]) : [];
   const el   = $('finance-list'); if(!el) return;
-  if(!fins.length){el.innerHTML=`<div class="empty">No finance records. <button onclick="openAddFinance('${pid||''}')" style="color:#3D5CF5;background:none;border:none;cursor:pointer">+ Add baseline</button></div>`;return;}
+  if(!fins.length){el.innerHTML=`<div class="empty">No Initial FS records. <button onclick="openAddFinance('${pid||''}')" style="color:#3D5CF5;background:none;border:none;cursor:pointer">+ Add baseline</button></div>`;return;}
   // Sort by type order
   const order=['concept','fs','design','contract','actual'];
   fins.sort((a,b)=>order.indexOf(a.type)-order.indexOf(b.type));
@@ -665,7 +665,7 @@ function renderFinance() {
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font-size:12px">
         <thead><tr style="background:#1A2F5A">
-          ${['Type','Label','Amount (tr.đ)','Actual (tr.đ)','Δ%','Approved by','Date','Status',''].map(h=>`<th style="padding:7px 12px;text-align:left;color:#fff;font-size:11px">${h}</th>`).join('')}
+          ${['Type','Label','Amount (VND m)','Actual (VND m)','Δ%','Approved by','Date','Status',''].map(h=>`<th style="padding:7px 12px;text-align:left;color:#fff;font-size:11px">${h}</th>`).join('')}
         </tr></thead>
         <tbody>${fins.map(f=>{
           const delta=f.actual&&f.amount?((+f.actual-+f.amount)/+f.amount*100).toFixed(1)+'%':'—';
@@ -673,8 +673,8 @@ function renderFinance() {
           return `<tr style="border-bottom:0.5px solid var(--border);background:${f.isCurrent==='TRUE'||f.isCurrent?'#EEF2FF':'inherit'}">
             <td style="padding:7px 12px;font-weight:600">${FINANCE_TYPES[f.type]||f.type}</td>
             <td style="padding:7px 12px;color:var(--text-secondary)">${f.label||'—'}</td>
-            <td style="padding:7px 12px;font-weight:700;color:#1A2F5A">${Number(f.amount||0).toLocaleString('vi-VN')}</td>
-            <td style="padding:7px 12px">${f.actual?Number(f.actual).toLocaleString('vi-VN'):'—'}</td>
+            <td style="padding:7px 12px;font-weight:700;color:#1A2F5A">${Number(f.amount||0).toLocaleString('en-US')}</td>
+            <td style="padding:7px 12px">${f.actual?Number(f.actual).toLocaleString('en-US'):'—'}</td>
             <td style="padding:7px 12px;color:${deltaC};font-weight:600">${delta}</td>
             <td style="padding:7px 12px;font-size:11px;color:var(--text-secondary)">${f.approvedBy||'—'}</td>
             <td style="padding:7px 12px;font-size:11px;color:var(--text-secondary)">${f.approvalDate||'—'}</td>
@@ -916,7 +916,7 @@ function saveDecision() {
     authorityLevel:$('dec-authority')?.value||'L2',options:$('dec-options')?.value||'',
     recommendation:$('dec-recommendation')?.value||'',deltaCapex:$('dec-dcapex')?.value||'',
     deltaTime:$('dec-dtime')?.value||'',deltaBiz:$('dec-dbiz')?.value||'',
-    accountable:$('dec-accountable')?.value||'CĐT',evidence:$('dec-evidence')?.value||'',
+    accountable:$('dec-accountable')?.value||'Owner',evidence:$('dec-evidence')?.value||'',
     note:$('dec-note')?.value||'',dueDate:$('dec-due')?.value||'',
     status:$('dec-status')?.value||'pending',decision:'',decisionDate:'',updatedAt:ts(),
   };
@@ -988,7 +988,7 @@ function saveFinance() {
   apiWrite('save_finance',entry);
   delete S._loaded['snapshot']; // force snapshot refresh
   renderFinance(); renderBim();
-  toast('Finance saved ✓');
+  toast('Initial FS saved ✓');
 }
 
 function deleteFinanceFromModal() {
@@ -1025,7 +1025,7 @@ const BIM_LIFECYCLE = [
     desc:'Validate capacity, technical assumptions, interfaces, CAPEX and business feasibility.',
     color:'#EEEDFE', tc:'#3C3489',
     governance:'Gate G02: Market + Technical + Financial FS + Investor Decision',
-    dashboard:'Finance → FS CAPEX baseline · Decisions → Investor approval',
+    dashboard:'Initial FS → FS CAPEX baseline · Decisions → Investor approval',
   },
   {
     code:'03', stage:'DESIGN BIM',
@@ -1049,7 +1049,7 @@ const BIM_LIFECYCLE = [
     desc:'Capture the final installed condition, approved changes and verified asset information.',
     color:'#E1F5EE', tc:'#085041',
     governance:'Gate G05: As-Built Model + Handover Docs + Defects Closed + SOP Final',
-    dashboard:'Finance → Final Account vs Contract · Actions → Defect items',
+    dashboard:'Initial FS → Final Account vs Contract · Actions → Defect items',
   },
   {
     code:'06', stage:'OPERATION BIM',
@@ -1057,7 +1057,7 @@ const BIM_LIFECYCLE = [
     desc:'Connect asset data with operation, maintenance, warranty and lifecycle management.',
     color:'#F1EFE8', tc:'#444441',
     governance:'Gate G06: KPI Baseline + SOPs Live + Rubix 4★ Certified',
-    dashboard:'Actions → OKR/KPI items · Finance → OPEX tracking',
+    dashboard:'Actions → OKR/KPI items · Initial FS → OPEX tracking',
   },
 ];
 
@@ -1103,8 +1103,8 @@ function openBimReference() {
 // TEAM QT (International Team)
 // ═══════════════════════════════════════════════════════════════
 const TZ_LIST = [
-  {label:'🇻🇳 Hà Nội', tz:'Asia/Ho_Chi_Minh'},
-  {label:'🇨🇳 Thượng Hải', tz:'Asia/Shanghai'},
+  {label:'🇻🇳 Hanoi', tz:'Asia/Ho_Chi_Minh'},
+  {label:'🇨🇳 Shanghai', tz:'Asia/Shanghai'},
   {label:'🇸🇬 Singapore', tz:'Asia/Singapore'},
   {label:'🇯🇵 Tokyo', tz:'Asia/Tokyo'},
   {label:'🇬🇧 London', tz:'Europe/London'},
@@ -1126,7 +1126,7 @@ function renderClocks() {
   const el = $('tz-clocks'); if(!el) return;
   el.innerHTML = TZ_LIST.map(tz => {
     const now  = new Date().toLocaleString('en-US', {timeZone:tz.tz, hour:'2-digit', minute:'2-digit', hour12:false});
-    const date = new Date().toLocaleString('vi-VN', {timeZone:tz.tz, weekday:'short', day:'2-digit', month:'2-digit'});
+    const date = new Date().toLocaleString('en-GB', {timeZone:tz.tz, weekday:'short', day:'2-digit', month:'2-digit'});
     const h    = parseInt(now.split(':')[0]);
     const isWork = h>=8&&h<18;
     return `<div class="card" style="text-align:center;border-top:3px solid ${isWork?'#0D6E4A':'#888'}">
@@ -1141,7 +1141,7 @@ function renderClocks() {
 
 function renderTeamList() {
   const el = $('team-list'); if(!el) return;
-  if(!S.team.length){el.innerHTML='<div class="empty">Chưa có thành viên. + Add member để thêm.</div>';return;}
+  if(!S.team.length){el.innerHTML='<div class="empty">No members yet. Use + Add member to begin.</div>';return;}
   el.innerHTML = S.team.map(m => `
     <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
       <div style="width:34px;height:34px;border-radius:50%;background:#EEF2FF;color:#3D5CF5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${(m.name||'?').slice(0,2).toUpperCase()}</div>
@@ -1160,8 +1160,8 @@ function renderTeamList() {
 
 function renderMeetingList() {
   const el = $('meeting-list'); if(!el) return;
-  if(!S.meetings.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:8px 0">Chưa có lịch họp định kỳ.</div>';return;}
-  const days = ['','Thứ 2','Thứ 3','Thứ 4','Thứ 5','Thứ 6','Thứ 7','CN'];
+  if(!S.meetings.length){el.innerHTML='<div style="font-size:11px;color:var(--muted);padding:8px 0">No recurring meetings yet.</div>';return;}
+  const days = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
   el.innerHTML = S.meetings.map(m=>`
     <div style="display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--border)">
       <div style="background:#EEF2FF;color:#3D5CF5;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;flex-shrink:0">${days[m.day]||m.day} ${m.time}</div>
@@ -1217,7 +1217,7 @@ function saveMeeting() {
 }
 function deleteMeeting(id){S.meetings=S.meetings.filter(x=>x.id!==id);saveLocal();renderMeetingList();}
 
-// Bilingual ZH report for Team TQ
+// Bilingual ZH report for 
 function generateZhReport() {
   const pid=S.activeProjectId;
   const proj=S.projects.find(p=>p.id===pid);
@@ -1226,9 +1226,9 @@ function generateZhReport() {
   const gate=S.gates.find(g=>g.projectId===pid&&g.stage===proj?.bimStage);
   const bimSt=getBimStage(proj?.bimStage||'01-concept');
   const wk=Math.ceil((new Date()-new Date(new Date().getFullYear(),0,1))/604800000);
-  const period=`Week ${wk} · ${new Date().toLocaleDateString('vi-VN')}`;
+  const period=`Week ${wk} · ${new Date().toLocaleDateString('en-GB')}`;
   const txt=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🇻🇳 BÁO CÁO TUẦN · BIM Governance
+🇻🇳 WEEKLY REPORT · BIM Governance
 🇨🇳 每周治理报告
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📅 ${period}
@@ -1242,13 +1242,13 @@ ${acts.slice(0,5).map(a=>`  • ${a.title}\n    A: ${a.accountable||'PMO'} | Due
 ${chgs.slice(0,3).map(c=>`  • [${c.authorityLevel}] ${c.title}${c.deltaCapex?` | ΔCost: ${c.deltaCapex}`:''}`).join('\n')||'  ✅ None'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-PMO — ${new Date().toLocaleDateString('vi-VN')}`;
+PMO — ${new Date().toLocaleDateString('en-GB')}`;
   $('zh-report-text')&&($('zh-report-text').value=txt);
   openModal('modal-zh-report');
 }
 
 // ═══════════════════════════════════════════════════════════════
-// M&A TRACKER
+// Partnership TRACKER
 // ═══════════════════════════════════════════════════════════════
 if(!S.ma)S.ma=[];if(!S._maCounter)S._maCounter=1;
 const MA_STAGES=[
@@ -1258,7 +1258,7 @@ const MA_STAGES=[
   {id:'negotiation',label:'🤝 Negotiation',color:'#633806',bg:'#FDF0E0'},
   {id:'closed',label:'✅ Closed',color:'#0D6E4A',bg:'#E0F8EE'},
 ];
-const MA_TYPES={'cleaning':'🧹 Vệ sinh CN','events':'🎪 Sự kiện','other':'🏢 Khác'};
+const MA_TYPES={'cleaning':'🧹 Industrial services','events':'🎪 Events','other':'🏢 Other'};
 
 function renderMa() {
   const el=$('ma-kanban');if(!el)return;
@@ -1279,7 +1279,7 @@ function renderMa() {
   }).join('');
   // Summary table
   const tbl=$('ma-table');if(!tbl)return;
-  if(!S.ma.length){tbl.innerHTML='<div class="empty">No M&A targets yet.</div>';return;}
+  if(!S.ma.length){tbl.innerHTML='<div class="empty">No Partnership targets yet.</div>';return;}
   tbl.innerHTML=`<table class="tbl" style="width:100%"><thead><tr><th>Company</th><th>Type</th><th>Stage</th><th>DD Score</th><th>Valuation</th><th>Contact</th><th>Note</th><th></th></tr></thead><tbody>
     ${S.ma.map(c=>{
       const st=MA_STAGES.find(s=>s.id===c.stage)||MA_STAGES[0];
@@ -1288,7 +1288,7 @@ function renderMa() {
         <td>${MA_TYPES[c.type]||c.type}</td>
         <td><span class="pill" style="background:${st.bg};color:${st.color}">${st.label}</span></td>
         <td style="font-weight:700;color:${+c.score>=70?'#0D6E4A':+c.score>=55?'#B86B00':'#C0392B'}">${c.score||'—'}</td>
-        <td>${c.valuation?Number(c.valuation).toLocaleString('vi-VN')+' tr':'—'}</td>
+        <td>${c.valuation?Number(c.valuation).toLocaleString('en-US')+' tr':'—'}</td>
         <td style="font-size:11px">${c.contact||'—'}</td>
         <td style="font-size:11px;max-width:150px">${c.note||'—'}</td>
         <td><button onclick="openEditMa('${c.id}')" style="font-size:10px;padding:2px 6px;background:var(--light);border:0.5px solid var(--border);border-radius:4px;cursor:pointer">✏️</button></td>
@@ -1371,7 +1371,7 @@ function renderPayments(){
         <div style="font-size:10px;color:var(--muted)">${proj?.name||'General'}${p.recur?` · 🔁 ${p.recur}`:''}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-size:12px;font-weight:700;color:#1A2F5A">${p.amount?Number(p.amount).toLocaleString('vi-VN')+' tr':''}</div>
+        <div style="font-size:12px;font-weight:700;color:#1A2F5A">${p.amount?Number(p.amount).toLocaleString('en-US')+' tr':''}</div>
         <span style="background:${st.bg};color:${st.c};padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600">${st.label}</span>
       </div>
       ${p.status!=='paid'?`<button onclick="markPaid('${p.id}')" style="font-size:10px;padding:3px 8px;background:#E0F8EE;color:#0D6E4A;border:1px solid #0D6E4A;border-radius:4px;cursor:pointer">✓ Paid</button>`:''}
@@ -1458,28 +1458,28 @@ function renderReport(){
   const bimSt=getBimStage(proj?.bimStage||'01-concept');
   const gate=S.gates.find(g=>g.projectId===pid&&g.stage===proj?.bimStage);
   const wk=Math.ceil((new Date()-new Date(new Date().getFullYear(),0,1))/604800000);
-  const rpt=`BÁO CÁO VẬN HÀNH TUẦN · ${new Date().toLocaleDateString('vi-VN')}
+  const rpt=`WEEKLY OPERATIONS REPORT · ${new Date().toLocaleDateString('en-GB')}
 Week ${wk} · PMO — BIM × 8×5 × Tgq
 ${'═'.repeat(50)}
 
-🏗 DỰ ÁN: ${proj?.name||'—'}
+🏗 PROJECT: ${proj?.name||'—'}
    BIM Stage: ${bimSt.code} ${bimSt.name}
    Gate ${gate?.gateCode||'—'}: ${gate?.readiness||0}% ready · ${GATE_STATUS[gate?.status||'not-ready']?.label||'—'}
-   CAPEX Baseline: ${cur?Number(cur.amount).toLocaleString('vi-VN')+' tr.đ':'Chưa có baseline'}
+   CAPEX Baseline: ${cur?Number(cur.amount).toLocaleString('en-US')+' VND m':'No baseline'}
 
 🔴 HIGH-PRIORITY ACTIONS (${acts.length})
-${acts.slice(0,5).map(a=>`   • ${a.title}\n     A: ${a.accountable||'PMO'} · Due: ${a.dueDate||'—'}`).join('\n')||'   ✅ Không có action khẩn cấp'}
+${acts.slice(0,5).map(a=>`   • ${a.title}\n     A: ${a.accountable||'PMO'} · Due: ${a.dueDate||'—'}`).join('\n')||'   ✅ No urgent actions'}
 
 ⚖️ PENDING DECISIONS (${dec.length})
-${dec.slice(0,3).map(d=>`   • [${d.authorityLevel}] ${d.subject}\n     Due: ${d.dueDate||'—'} · A: ${d.accountable||'CĐT'}`).join('\n')||'   ✅ Không có decision đang chờ'}
+${dec.slice(0,3).map(d=>`   • [${d.authorityLevel}] ${d.subject}\n     Due: ${d.dueDate||'—'} · A: ${d.accountable||'Owner'}`).join('\n')||'   ✅ No pending decisions'}
 
 ${cur&&cur.actual?`💰 FINANCE
-   Baseline: ${Number(cur.amount).toLocaleString('vi-VN')} tr.đ
-   Actual: ${Number(cur.actual).toLocaleString('vi-VN')} tr.đ
+   Baseline: ${Number(cur.amount).toLocaleString('en-US')} VND m
+   Actual: ${Number(cur.actual).toLocaleString('en-US')} VND m
    Δ: ${((+cur.actual-+cur.amount)/+cur.amount*100).toFixed(1)}%`:''}
 
 ${'═'.repeat(50)}
-PMO · ${new Date().toLocaleDateString('vi-VN')}`;
+PMO · ${new Date().toLocaleDateString('en-GB')}`;
   const el=$('report-preview');if(el)el.value=rpt;
 }
 
@@ -1487,4 +1487,7 @@ function copyReport(){
   const el=$('report-preview');if(!el)return;
   navigator.clipboard.writeText(el.value).then(()=>toast('Copied to clipboard ✓'));
 }
+
+
+
 

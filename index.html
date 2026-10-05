@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Ops Dashboard · BIM × 8×5 · Governance</title>
+<title>Portfolio OS · Owner Governance</title>
 <style>
 :root{
   --navy:#1A2F5A;--blue:#3D5CF5;--teal:#0D6E4A;--amber:#B86B00;--red:#C0392B;
@@ -106,9 +106,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
   <div class="tab" onclick="sw('actions',this)">📋 Actions</div>
   <div class="tab" onclick="sw('changes',this)">📝 Changes</div>
   <div class="tab" onclick="sw('decisions',this)">⚖️ Decisions</div>
-  <div class="tab" onclick="sw('finance',this)">💰 Finance</div>
-  <div class="tab" onclick="sw('team',this)">🌏 Team QT</div>
-  <div class="tab" onclick="sw('ma',this)">🏭 M&A</div>
+  <div class="tab" onclick="sw('finance',this)">📊 Initial FS</div>
+  <div class="tab" onclick="sw('ma',this)">🤝 Partnership</div>
   <div class="tab" onclick="sw('schedule',this)">📅 Schedule</div>
   <div class="tab" onclick="sw('report',this)">📤 Report</div>
   <div class="tab" onclick="openBimReference()" style="border-left:1px solid var(--border);color:#3D5CF5">? BIM</div>
@@ -134,7 +133,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
     </div>
   </div>
 
-  <div class="sec">⚖️ Decisions Pending CĐT</div>
+  <div class="sec">⚖️ Decisions Pending Owner</div>
   <div class="card" style="padding:0;overflow:hidden">
     <div id="pending-decisions-list"></div>
   </div>
@@ -206,11 +205,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
     <div class="modal-body">
       <input type="hidden" id="proj-id-hidden">
       <div class="row-f c2">
-        <div class="field" style="grid-column:1/-1"><label class="lbl">Project name *</label><input type="text" id="proj-name" placeholder="VD: 16 Láng Hạ T2"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Project name *</label><input type="text" id="proj-name" placeholder="Example: Project Alpha"></div>
         <div class="field"><label class="lbl">Type</label>
           <select id="proj-type">
-            <option value="office">Văn phòng cho thuê</option><option value="hotel">Khách sạn</option>
-            <option value="mixed">Mixed-use</option><option value="construction">Thi công</option><option value="other">Khác</option>
+            <option value="office">Office leasing</option><option value="hotel">Hotel</option>
+            <option value="mixed">Mixed-use</option><option value="construction">Construction</option><option value="other">Other</option>
           </select>
         </div>
         <div class="field"><label class="lbl">Country / Location</label><input type="text" id="proj-country" placeholder="Vietnam"></div>
@@ -311,22 +310,22 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
             <option value="03-design">03 Design</option><option value="04-construction">04 Construction</option>
           </select>
         </div>
-        <div class="field" style="grid-column:1/-1"><label class="lbl">Title *</label><input type="text" id="chg-title" placeholder="VD: Adjust circulation T1 — add corridor 1.5m"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Title *</label><input type="text" id="chg-title" placeholder="Example: Adjust circulation T1 — add corridor 1.5m"></div>
         <div class="field" style="grid-column:1/-1"><label class="lbl">Content / Description</label><textarea id="chg-content" rows="2"></textarea></div>
         <div class="field"><label class="lbl">Authority Level</label>
           <select id="chg-authority">
             <option value="L1">L1 — PMO (no baseline impact)</option>
-            <option value="L2">L2 — CĐT (cost/schedule impact)</option>
+            <option value="L2">L2 — Owner (cost/schedule impact)</option>
             <option value="L3">L3 — Board (strategic)</option>
           </select>
         </div>
-        <div class="field"><label class="lbl">Baseline reference</label><input type="text" id="chg-baseline" placeholder="VD: Concept Baseline v1 / FS CAPEX"></div>
+        <div class="field"><label class="lbl">Baseline reference</label><input type="text" id="chg-baseline" placeholder="Example: Concept Baseline v1 / FS CAPEX"></div>
         <div class="field"><label class="lbl">R — Responsible</label><input type="text" id="chg-responsible"></div>
         <div class="field"><label class="lbl">A — Accountable</label><input type="text" id="chg-accountable" placeholder="PMO"></div>
-        <div class="field"><label class="lbl">ΔCapex (tr.đ)</label><input type="text" id="chg-dcapex" placeholder="0 / +500 / —"></div>
+        <div class="field"><label class="lbl">ΔCapex (VND m)</label><input type="text" id="chg-dcapex" placeholder="0 / +500 / —"></div>
         <div class="field"><label class="lbl">ΔTime (days)</label><input type="text" id="chg-dtime" placeholder="0 / +14 / —"></div>
-        <div class="field"><label class="lbl">ΔCapacity</label><input type="text" id="chg-dcap" placeholder="VD: -15 workstations"></div>
-        <div class="field"><label class="lbl">ΔBusiness / Revenue</label><input type="text" id="chg-dbiz" placeholder="VD: Revenue -5% / TBD"></div>
+        <div class="field"><label class="lbl">ΔCapacity</label><input type="text" id="chg-dcap" placeholder="Example: -15 workstations"></div>
+        <div class="field"><label class="lbl">ΔBusiness / Revenue</label><input type="text" id="chg-dbiz" placeholder="Example: Revenue -5% / TBD"></div>
         <div class="field"><label class="lbl">Status</label>
           <select id="chg-status">
             <option value="pending">Pending approval</option><option value="approved">Approved</option>
@@ -361,18 +360,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
             <option value="03-design">03 Design</option><option value="04-construction">04 Construction</option>
           </select>
         </div>
-        <div class="field" style="grid-column:1/-1"><label class="lbl">Subject *</label><input type="text" id="dec-subject" placeholder="VD: Approve functional zoning T2 Event Hall"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Subject *</label><input type="text" id="dec-subject" placeholder="Example: Approve functional zoning T2 Event Hall"></div>
         <div class="field"><label class="lbl">Authority Level</label>
           <select id="dec-authority">
-            <option value="L1">L1 — PMO</option><option value="L2">L2 — CĐT</option><option value="L3">L3 — CĐT + Board</option>
+            <option value="L1">L1 — PMO</option><option value="L2">L2 — Owner</option><option value="L3">L3 — Owner + Board</option>
           </select>
         </div>
-        <div class="field"><label class="lbl">Accountable (A)</label><input type="text" id="dec-accountable" placeholder="CĐT"></div>
+        <div class="field"><label class="lbl">Accountable (A)</label><input type="text" id="dec-accountable" placeholder="Owner"></div>
         <div class="field" style="grid-column:1/-1"><label class="lbl">Options</label><textarea id="dec-options" rows="2" placeholder="Option A: ...\nOption B: ..."></textarea></div>
         <div class="field" style="grid-column:1/-1"><label class="lbl">PM Recommendation</label><textarea id="dec-recommendation" rows="2"></textarea></div>
         <div class="field"><label class="lbl">ΔCapex</label><input type="text" id="dec-dcapex" placeholder="+500tr / 0 / TBD"></div>
         <div class="field"><label class="lbl">ΔTime</label><input type="text" id="dec-dtime" placeholder="+14d / 0"></div>
-        <div class="field" style="grid-column:1/-1"><label class="lbl">Business / Capacity Impact</label><input type="text" id="dec-dbiz" placeholder="VD: -15 workstations, FS cannot start until approved"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Business / Capacity Impact</label><input type="text" id="dec-dbiz" placeholder="Example: -15 workstations, FS cannot start until approved"></div>
         <div class="field"><label class="lbl">Due date</label><input type="date" id="dec-due"></div>
         <div class="field"><label class="lbl">Status</label>
           <select id="dec-status">
@@ -396,7 +395,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
 <div class="overlay" id="modal-finance">
   <div class="modal">
     <div class="modal-header">
-      <div style="font-size:14px;font-weight:700">Finance Baseline</div>
+      <div style="font-size:14px;font-weight:700">Initial FS</div>
       <button class="close-btn" onclick="closeModal('modal-finance')">✕</button>
     </div>
     <div class="modal-body">
@@ -410,10 +409,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
             <option value="actual">Actual Cost</option>
           </select>
         </div>
-        <div class="field"><label class="lbl">Label / Version</label><input type="text" id="fin-label" placeholder="VD: FS CAPEX Rev.01 — post market study"></div>
-        <div class="field"><label class="lbl">Amount (tr.đ) *</label><input type="number" id="fin-amount" placeholder="0"></div>
-        <div class="field"><label class="lbl">Actual to date (tr.đ)</label><input type="number" id="fin-actual" placeholder="0"></div>
-        <div class="field"><label class="lbl">Approved by</label><input type="text" id="fin-approved-by" placeholder="CĐT / PMO"></div>
+        <div class="field"><label class="lbl">Label / Version</label><input type="text" id="fin-label" placeholder="Example: FS CAPEX Rev.01 — post market study"></div>
+        <div class="field"><label class="lbl">Amount (VND m) *</label><input type="number" id="fin-amount" placeholder="0"></div>
+        <div class="field"><label class="lbl">Actual to date (VND m)</label><input type="number" id="fin-actual" placeholder="0"></div>
+        <div class="field"><label class="lbl">Approved by</label><input type="text" id="fin-approved-by" placeholder="Owner / PMO"></div>
         <div class="field"><label class="lbl">Approval date</label><input type="date" id="fin-approval-date"></div>
         <div class="field" style="grid-column:1/-1;display:flex;align-items:center;gap:8px;padding-top:16px">
           <input type="checkbox" id="fin-current" style="width:16px;height:16px">
@@ -451,8 +450,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
         <div class="field" style="flex:1;margin:0"><input type="time" id="mtg-time" value="09:00"></div>
         <div class="field" style="flex:1;margin:0">
           <select id="mtg-day">
-            <option value="1">Thứ 2</option><option value="2">Thứ 3</option><option value="3">Thứ 4</option>
-            <option value="4">Thứ 5</option><option value="5" selected>Thứ 6</option>
+            <option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option>
+            <option value="4">Thursday</option><option value="5" selected>Friday</option>
           </select>
         </div>
         <div class="field" style="flex:2;margin:0"><input type="text" id="mtg-link" placeholder="Meeting link"></div>
@@ -463,17 +462,17 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
 
   <div style="margin-top:14px;background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div style="font-size:12px;font-weight:600">🇨🇳 Bilingual Report — VI + ZH</div>
+      <div style="font-size:12px;font-weight:600">🇨🇳 Bilingual Report — English</div>
       <button class="btn btn-sm" style="background:#EEF2FF;color:#3D5CF5;border-color:#3D5CF5" onclick="generateZhReport()">Generate Report</button>
     </div>
-    <div style="font-size:11px;color:var(--muted)">Tạo báo cáo song ngữ VI+ZH cho team Trung Quốc — gồm Open Actions, Pending Changes, Gate Status. Copy và gửi qua WeChat.</div>
+    <div style="font-size:11px;color:var(--muted)">Generate an English project report covering open actions, pending changes, and Gate status.</div>
   </div>
 </div>
 
-<!-- M&A TRACKER -->
+<!-- Partnership TRACKER -->
 <div id="panel-ma" class="panel">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-    <div style="font-size:12px;color:var(--muted)">M&A pipeline — Vệ sinh công nghiệp · Sự kiện · Khác</div>
+    <div style="font-size:12px;color:var(--muted)">Partnership pipeline</div>
     <button class="btn btn-primary btn-sm" onclick="openAddMa()">+ Add company</button>
   </div>
   <div id="ma-kanban" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px"></div>
@@ -531,7 +530,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
 <div class="overlay" id="modal-zh-report">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <div style="font-size:14px;font-weight:700">🇨🇳 Bilingual Report VI+ZH</div>
+      <div style="font-size:14px;font-weight:700">🇨🇳 Bilingual Report English</div>
       <button class="close-btn" onclick="closeModal('modal-zh-report')">✕</button>
     </div>
     <div class="modal-body">
@@ -559,8 +558,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
         <div class="field"><label class="lbl">Nationality</label><input type="text" id="mb-nat" placeholder="Vietnam / China"></div>
         <div class="field"><label class="lbl">Timezone</label>
           <select id="mb-tz">
-            <option value="GMT+7 Hà Nội">🇻🇳 GMT+7 Hà Nội</option>
-            <option value="GMT+8 Thượng Hải">🇨🇳 GMT+8 Thượng Hải</option>
+            <option value="GMT+7 Hanoi">🇻🇳 GMT+7 Hanoi</option>
+            <option value="GMT+8 Shanghai">🇨🇳 GMT+8 Shanghai</option>
             <option value="GMT+8 Singapore">🇸🇬 GMT+8 Singapore</option>
             <option value="GMT+9 Tokyo">🇯🇵 GMT+9 Tokyo</option>
           </select>
@@ -581,11 +580,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
   </div>
 </div>
 
-<!-- M&A modal -->
+<!-- Partnership modal -->
 <div class="overlay" id="modal-ma">
   <div class="modal">
     <div class="modal-header">
-      <div style="font-size:14px;font-weight:700">M&A Target</div>
+      <div style="font-size:14px;font-weight:700">Partnership Target</div>
       <button class="close-btn" onclick="closeModal('modal-ma')">✕</button>
     </div>
     <div class="modal-body">
@@ -593,7 +592,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
       <div class="row-f c2">
         <div class="field" style="grid-column:1/-1"><label class="lbl">Company name *</label><input type="text" id="ma-name"></div>
         <div class="field"><label class="lbl">Type</label>
-          <select id="ma-type"><option value="cleaning">🧹 Vệ sinh CN</option><option value="events">🎪 Sự kiện</option><option value="other">🏢 Khác</option></select>
+          <select id="ma-type"><option value="cleaning">🧹 Industrial services</option><option value="events">🎪 Events</option><option value="other">🏢 Other</option></select>
         </div>
         <div class="field"><label class="lbl">Stage</label>
           <select id="ma-stage">
@@ -601,9 +600,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
             <option value="dd">🔬 Due Diligence</option><option value="negotiation">🤝 Negotiation</option><option value="closed">✅ Closed</option>
           </select>
         </div>
-        <div class="field"><label class="lbl">Location / Địa bàn</label><input type="text" id="ma-location" placeholder="Hà Nội"></div>
+        <div class="field"><label class="lbl">Location / Location</label><input type="text" id="ma-location" placeholder="Hanoi"></div>
         <div class="field"><label class="lbl">DD Score (0–100)</label><input type="number" id="ma-score" min="0" max="100"></div>
-        <div class="field"><label class="lbl">Valuation (tr.đ)</label><input type="number" id="ma-valuation"></div>
+        <div class="field"><label class="lbl">Valuation (VND m)</label><input type="number" id="ma-valuation"></div>
         <div class="field"><label class="lbl">Contact / Founder</label><input type="text" id="ma-contact"></div>
         <div class="field" style="grid-column:1/-1"><label class="lbl">Note / Next step</label><textarea id="ma-note" rows="2"></textarea></div>
       </div>
@@ -625,9 +624,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
     </div>
     <div class="modal-body">
       <div class="row-f c2">
-        <div class="field" style="grid-column:1/-1"><label class="lbl">Payment name *</label><input type="text" id="pay-name" placeholder="VD: Tiền thuê mặt bằng T23"></div>
+        <div class="field" style="grid-column:1/-1"><label class="lbl">Payment name *</label><input type="text" id="pay-name" placeholder="Example: T23 site rent"></div>
         <div class="field"><label class="lbl">Project</label><select id="pay-project"></select></div>
-        <div class="field"><label class="lbl">Amount (tr.đ)</label><input type="number" id="pay-amount"></div>
+        <div class="field"><label class="lbl">Amount (VND m)</label><input type="number" id="pay-amount"></div>
         <div class="field"><label class="lbl">Due date</label><input type="date" id="pay-due"></div>
         <div class="field"><label class="lbl">Recurring</label>
           <select id="pay-recur"><option value="">One-time</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option></select>
@@ -650,7 +649,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
       <button class="close-btn" onclick="closeModal('modal-todo')">✕</button>
     </div>
     <div class="modal-body">
-      <div class="field"><label class="lbl">Task *</label><input type="text" id="todo-title" placeholder="VD: Gửi báo cáo tuần cho CĐT"></div>
+      <div class="field"><label class="lbl">Task *</label><input type="text" id="todo-title" placeholder="Example: Send weekly report to Owner"></div>
       <div class="row-f c2">
         <div class="field"><label class="lbl">Priority</label>
           <select id="todo-priority"><option value="high">🔴 High</option><option value="med" selected>🟡 Medium</option><option value="low">🟢 Low</option></select>
@@ -666,6 +665,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--blue);outline-of
   </div>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js"></script><script src="portfolio.js"></script><script src="modules.js"></script><script src="personal.js"></script>
 </body>
 </html>
+
+
+
+
+
